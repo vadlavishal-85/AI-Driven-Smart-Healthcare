@@ -143,6 +143,7 @@ export default function AppRoutes() {
       <Route path="/dashboard/exchange" element={<Navigate to="/data-exchange" replace />} />
       <Route path="/dashboard/analytics" element={<Navigate to="/analytics" replace />} />
       <Route path="/dashboard/settings" element={<Navigate to="/settings" replace />} />
+      <Route path="/dashboard/profile" element={<Navigate to="/profile" replace />} />
 
       {/* 7. 404 Fallback */}
       <Route path="/404" element={<NotFound />} />

@@ -27,14 +27,14 @@ export default function RoleSelection() {
       workspaceTitle: 'Clinical Workspace',
       tagline: 'Physician Clinical Suite',
       description:
-        'Manage patient consultation queues, review electronic medical records, author structured SOAP notes, and issue digital prescriptions.',
+        'Review appointments assigned to your account, update visit status, and add diagnosis, treatment plan, and clinical notes.',
       image: doctorRoleImg,
       icon: Stethoscope,
       theme: 'teal',
       badgeColor: 'badge-teal',
       btnText: 'Enter Doctor Workspace',
-      demoUser: 'Dr. Ananya Rao (doctor.demo@smarthealthcare.local)',
-      capabilities: ['Consultation Queue', 'SOAP Notes', 'e-Prescribing', 'ICD-10 Diagnostics'],
+      demoUser: 'A doctor account must be provisioned by an administrator.',
+      capabilities: ['Assigned Appointments', 'Visit Status', 'Clinical Notes'],
     },
     {
       id: 'PATIENT',
@@ -42,14 +42,14 @@ export default function RoleSelection() {
       workspaceTitle: 'Personal Healthcare',
       tagline: 'Personal Health Portal',
       description:
-        'Access your verified medical records, schedule doctor appointments, review vital telemetry, and manage active prescriptions.',
+        'Create your account, book appointments with available doctors, and view your own appointment and visit information.',
       image: patientRoleImg,
       icon: UserCheck,
       theme: 'blue',
       badgeColor: 'badge-blue',
       btnText: 'Enter Patient Portal',
-      demoUser: 'Rahul Mehta (patient.demo@smarthealthcare.local)',
-      capabilities: ['Health Charts', 'Appointment Booking', 'Active Prescriptions', 'Vitals Telemetry'],
+      demoUser: 'New patients can register from the patient portal.',
+      capabilities: ['Appointment Booking', 'Appointment Status', 'Your Visit Notes'],
     },
     {
       id: 'ADMIN',
@@ -57,14 +57,14 @@ export default function RoleSelection() {
       workspaceTitle: 'Smart Hospital Operations',
       tagline: 'Operations Center',
       description:
-        'Oversee dual-database persistence telemetry (MySQL + MongoDB), manage clinical directories, and monitor FHIR interoperability streams.',
+        'Use the administrator account to provision doctor accounts so they can receive patient appointment requests.',
       image: adminRoleImg,
       icon: Shield,
       theme: 'cyan',
       badgeColor: 'badge-cyan',
       btnText: 'Enter Operations Center',
-      demoUser: 'SmartCare Admin (admin.demo@smarthealthcare.local)',
-      capabilities: ['Dual DB Telemetry', 'Practitioner Directory', 'FHIR Interoperability', 'Audit Events'],
+      demoUser: 'Administrator credentials are set in the deployment environment.',
+      capabilities: ['Doctor Account Provisioning', 'Appointment Directory'],
     },
   ];
 
@@ -186,11 +186,11 @@ export default function RoleSelection() {
           <div className="role-trust-strip">
             <div className="role-trust-item">
               <CheckCircle2 size={16} className="text-success" />
-              <span>Real Database Synchronization (MySQL 8.4 + MongoDB 6.0+)</span>
+              <span>Appointment data stored in the configured SQL database</span>
             </div>
             <div className="role-trust-item">
               <Lock size={16} className="text-cyan" />
-              <span>Bcrypt Password Encryption & JWT Role Verification</span>
+              <span>Hashed passwords & role-based access control</span>
             </div>
           </div>
         </div>

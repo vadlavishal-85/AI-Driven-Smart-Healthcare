@@ -195,15 +195,15 @@ export default function TopNavbar() {
                     <div className="sh-notif-item">
                       <ShieldCheck size={16} className="text-success" />
                       <div>
-                        <p className="notif-title">Dual Database Synced</p>
-                        <span className="notif-time">MySQL & MongoDB connected</span>
+                        <p className="notif-title">Appointment Workflow</p>
+                        <span className="notif-time">Account and appointment data use the configured SQL database</span>
                       </div>
                     </div>
                     <div className="sh-notif-item">
                       <Radio size={16} className="text-cyan" />
                       <div>
-                        <p className="notif-title">FHIR R4 Gateway Ready</p>
-                        <span className="notif-time">Interoperability router online</span>
+                        <p className="notif-title">Other Modules</p>
+                        <span className="notif-time">Clinical records and data exchange are preview screens only</span>
                       </div>
                     </div>
                   </div>

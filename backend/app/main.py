@@ -138,6 +138,61 @@ def initialize_relational_database():
                     is_active=True,
                 ))
                 db.commit()
+
+            # Optional presentation accounts are provisioned only when the
+            # deployment explicitly enables them and supplies generated secrets.
+            if os.getenv("ENABLE_DEMO_ACCOUNTS", "").strip().lower() in {"1", "true", "yes"}:
+                demo_accounts = [
+                    (
+                        "DEMO_PATIENT_EMAIL", "DEMO_PATIENT_PASSWORD",
+                        "Demo", "Patient", RoleEnum.PATIENT,
+                    ),
+                    (
+                        "DEMO_DOCTOR_EMAIL", "DEMO_DOCTOR_PASSWORD",
+                        "Demo", "Doctor", RoleEnum.DOCTOR,
+                    ),
+                    (
+                        "DEMO_ADMIN_EMAIL", "DEMO_ADMIN_PASSWORD",
+                        "Demo", "Administrator", RoleEnum.ADMIN,
+                    ),
+                ]
+                for email_key, password_key, first_name, last_name, role_value in demo_accounts:
+                    email = os.getenv(email_key, "").strip().lower()
+                    password = os.getenv(password_key, "").strip()
+                    if not email or not password:
+                        logger.warning("Presentation account skipped because %s or %s is missing", email_key, password_key)
+                        continue
+
+                    existing = db.query(User).filter(User.email == email).first()
+                    if existing:
+                        if existing.role.name != role_value.value:
+                            logger.error("Presentation account email is already assigned to a different role (%s)", email_key)
+                        elif role_value == RoleEnum.DOCTOR and not existing.doctor_profile:
+                            db.add(DoctorProfile(
+                                user_id=existing.id,
+                                department="Primary Care",
+                                specialty="General Practice",
+                            ))
+                        continue
+
+                    role_record = db.query(Role).filter(Role.name == role_value.value).one()
+                    demo_user = User(
+                        role_id=role_record.id,
+                        first_name=first_name,
+                        last_name=last_name,
+                        email=email,
+                        password_hash=hash_password(password),
+                        is_active=True,
+                    )
+                    db.add(demo_user)
+                    db.flush()
+                    if role_value == RoleEnum.DOCTOR:
+                        db.add(DoctorProfile(
+                            user_id=demo_user.id,
+                            department="Primary Care",
+                            specialty="General Practice",
+                        ))
+                db.commit()
     except SQLAlchemyError as exc:
         # Keep liveness available so Render can show logs; readiness remains 503.
         logger.error("Relational database initialization failed (%s)", type(exc).__name__)

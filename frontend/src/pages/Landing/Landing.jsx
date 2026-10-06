@@ -43,15 +43,15 @@ export default function Landing() {
     {
       id: 'patient',
       title: '1. Patient',
-      desc: 'Registers clinical profile and requests consultation',
+      desc: 'Creates a patient account and requests a doctor appointment',
       icon: UserCheck,
       color: 'blue',
-      badge: 'MySQL Identity',
+      badge: 'Patient account',
     },
     {
       id: 'doctor',
       title: '2. Doctor',
-      desc: 'Assigned specialist reviews intake & opens clinical chart',
+      desc: 'A provisioned doctor reviews assigned appointments',
       icon: Stethoscope,
       color: 'teal',
       badge: 'Attending Physician',
@@ -59,96 +59,96 @@ export default function Landing() {
     {
       id: 'appointments',
       title: '3. Appointments',
-      desc: 'Synchronized ACID consultation booking and queue',
+      desc: 'Book, view, and update appointment status in the database',
       icon: Calendar,
       color: 'cyan',
-      badge: 'Real-time Scheduler',
+      badge: 'Database-backed',
     },
     {
       id: 'records',
       title: '4. Medical Records',
-      desc: 'Structured diagnostic records & ICD-10 indexed charts',
+      desc: 'Sample screen only; not connected to saved patient data',
       icon: FileText,
       color: 'blue',
-      badge: 'MongoDB Store',
+      badge: 'Preview only',
     },
     {
       id: 'prescriptions',
       title: '5. Prescriptions',
-      desc: 'Authorized e-prescriptions with dispensary tracking',
+      desc: 'Sample screen only; prescriptions are not stored',
       icon: Pill,
       color: 'teal',
-      badge: 'Digital Rx',
+      badge: 'Preview only',
     },
     {
       id: 'exchange',
       title: '6. Data Exchange',
-      desc: 'FHIR R4 & HL7 v2 interoperability payload transmission',
+      desc: 'Sample screen only; external data exchange is not configured',
       icon: ArrowLeftRight,
       color: 'cyan',
-      badge: 'HIE Gateway',
+      badge: 'Preview only',
     },
     {
       id: 'analytics',
       title: '7. Analytics',
-      desc: 'Hospital telemetry, operational intelligence & census',
+      desc: 'Sample screen only; operational analytics are not connected',
       icon: BarChart3,
       color: 'emerald',
-      badge: 'Enterprise Telemetry',
+      badge: 'Preview only',
     },
   ];
 
   const networkNodes = [
-    { id: 'PAT', title: 'PATIENTS', icon: UserCheck, count: '4 Active', color: 'blue' },
-    { id: 'DOC', title: 'DOCTORS', icon: Stethoscope, count: '4 Specialists', color: 'teal' },
-    { id: 'APT', title: 'APPOINTMENTS', icon: Calendar, count: '5 Managed', color: 'cyan' },
-    { id: 'EMR', title: 'MEDICAL RECORDS', icon: FileText, count: 'MongoDB Core', color: 'blue' },
-    { id: 'RX', title: 'PRESCRIPTIONS', icon: Pill, count: 'Digital Dispensary', color: 'teal' },
-    { id: 'HIE', title: 'DATA EXCHANGE', icon: ArrowLeftRight, count: 'FHIR R4 / HL7', color: 'cyan' },
-    { id: 'OPS', title: 'ANALYTICS', icon: BarChart3, count: 'Dual DB Stream', color: 'emerald' },
+    { id: 'PAT', title: 'PATIENTS', icon: UserCheck, count: 'Account access', color: 'blue' },
+    { id: 'DOC', title: 'DOCTORS', icon: Stethoscope, count: 'Admin-provisioned', color: 'teal' },
+    { id: 'APT', title: 'APPOINTMENTS', icon: Calendar, count: 'Saved visits', color: 'cyan' },
+    { id: 'EMR', title: 'MEDICAL RECORDS', icon: FileText, count: 'Preview only', color: 'blue' },
+    { id: 'RX', title: 'PRESCRIPTIONS', icon: Pill, count: 'Preview only', color: 'teal' },
+    { id: 'HIE', title: 'DATA EXCHANGE', icon: ArrowLeftRight, count: 'Preview only', color: 'cyan' },
+    { id: 'OPS', title: 'ANALYTICS', icon: BarChart3, count: 'Preview only', color: 'emerald' },
   ];
 
   const capabilities = [
     {
       icon: Calendar,
       title: 'Appointments',
-      desc: 'Conflict-free appointment scheduling across hospital departments with dual-database locking.',
-      tag: 'ACID Transactions',
+      desc: 'Patients can request a visit with a doctor, and authorized users can manage its status and visit notes.',
+      tag: 'Saved appointment workflow',
       theme: 'blue',
     },
     {
       icon: FileText,
       title: 'Medical Records',
-      desc: 'Document-oriented clinical records with ICD-10 diagnostic indexing, vitals, and lab attachments.',
-      tag: 'MongoDB Document Core',
+      desc: 'This screen shows sample content and is not connected to clinical records.',
+      tag: 'Preview only',
       theme: 'teal',
     },
     {
       icon: Layers,
       title: 'Clinical Notes',
-      desc: 'Structured SOAP progress documentation (Subjective, Objective, Assessment, Plan) with digital physician signing.',
-      tag: 'SOAP Methodology',
+      desc: 'Doctors can save a diagnosis, treatment plan, and clinical notes to an assigned appointment.',
+      tag: 'Appointment-linked notes',
       theme: 'cyan',
     },
     {
       icon: Pill,
       title: 'Prescriptions',
-      desc: 'End-to-end digital prescription workflow with dosage schedules, refills, and outpatient dispensary status.',
-      tag: 'e-Prescribing',
+      desc: 'Sample screen only. Medication orders and pharmacy fulfillment are not connected.',
+      tag: 'Preview only',
       theme: 'emerald',
     },
     {
       icon: ArrowLeftRight,
       title: 'Healthcare Exchange',
-      desc: 'FHIR R4 DiagnosticReport & HL7 v2 ADT_A01 interoperability gateways with cryptographic SHA256 seals.',
-      tag: 'FHIR R4 & HL7 v2',
+      desc: 'Sample screen only. No external healthcare exchange is configured.',
+      tag: 'Preview only',
       theme: 'cyan',
     },
     {
       icon: BarChart3,
       title: 'Analytics & Audit',
-      desc: 'Real-time hospital operations telemetry, census monitoring, demographic distributions, and immutable audit logs.',
-      tag: 'Enterprise Telemetry',
+      desc: 'Sample screen only. Analytics and audit events are not connected to live data.',
+      tag: 'Preview only',
       theme: 'blue',
     },
   ];
@@ -158,34 +158,34 @@ export default function Landing() {
       id: 'DOCTOR',
       title: 'Doctor Portal',
       tagline: 'Clinical Workspace',
-      desc: 'Manage clinical queues, author SOAP progress notes, examine diagnostic EMRs, and sign digital prescriptions.',
+      desc: 'View visits assigned to your account, update appointment status, and save clinical notes.',
       image: doctorRoleImg,
       icon: Stethoscope,
       theme: 'teal',
       accent: '#0d9488',
-      features: ['Consultation Queue', 'SOAP Note Authoring', 'ICD-10 Diagnostic Charts'],
+      features: ['Assigned Appointments', 'Visit Status', 'Appointment-Linked Notes'],
     },
     {
       id: 'PATIENT',
       title: 'Patient Portal',
       tagline: 'Personal Healthcare',
-      desc: 'Access your secure medical charts, book clinical visits, monitor vitals, and track active prescriptions.',
+      desc: 'Create an account, book appointments, and review your own appointment and visit information.',
       image: patientRoleImg,
       icon: UserCheck,
       theme: 'blue',
       accent: '#0284c7',
-      features: ['Personal Health Chart', 'Doctor Consultations', 'Active Medication Refills'],
+      features: ['Appointment Booking', 'Appointment Status', 'Your Visit Notes'],
     },
     {
       id: 'ADMIN',
       title: 'Admin Console',
       tagline: 'Smart Hospital Operations',
-      desc: 'Oversee dual-database persistence engines, practitioner rosters, FHIR telemetry, and institutional audit events.',
+      desc: 'Provision doctor accounts that can receive appointment requests from patients.',
       image: adminRoleImg,
       icon: Shield,
       theme: 'cyan',
       accent: '#06b6d4',
-      features: ['Dual DB Status (MySQL+Mongo)', 'FHIR Exchange Stream', 'Hospital Telemetry'],
+      features: ['Doctor Account Provisioning', 'Appointment Directory'],
     },
   ];
 
@@ -261,7 +261,7 @@ export default function Landing() {
             <span className="pulse-dot-cyan" />
             <span>Next-Gen Connected Hospital Platform</span>
             <span className="sh-badge-sep">•</span>
-            <span className="sh-badge-highlight">Dual Engine MySQL & MongoDB</span>
+            <span className="sh-badge-highlight">Appointment Booking & Visit Notes</span>
           </div>
 
           <h1 className="sh-hero-headline">
@@ -273,8 +273,8 @@ export default function Landing() {
           </p>
 
           <p className="sh-hero-description">
-            One unified ecosystem connecting patients, clinical practitioners, and smart hospital operations.
-            Engineered for synchronized appointments, electronic medical records, and FHIR interoperability.
+            A healthcare project demo with patient registration, doctor appointments, and appointment-linked clinical notes.
+            Other clinical screens are sample previews and are not connected to saved data.
           </p>
 
           <div className="sh-hero-actions-row">
@@ -297,18 +297,18 @@ export default function Landing() {
           {/* Quick Metrics Strip on Hero */}
           <div className="sh-hero-metrics-strip">
             <div className="sh-hero-metric-item">
-              <span className="sh-metric-val">100%</span>
-              <span className="sh-metric-label">Role-Isolated Security</span>
+              <span className="sh-metric-val">3 roles</span>
+              <span className="sh-metric-label">Patient · Doctor · Admin</span>
             </div>
             <div className="sh-hero-metric-sep" />
             <div className="sh-hero-metric-item">
-              <span className="sh-metric-val">MySQL + Mongo</span>
-              <span className="sh-metric-label">Dual Persistence Architecture</span>
+              <span className="sh-metric-val">SQL database</span>
+              <span className="sh-metric-label">Postgres on Render · SQLite locally</span>
             </div>
             <div className="sh-hero-metric-sep" />
             <div className="sh-hero-metric-item">
-              <span className="sh-metric-val">FHIR R4 / HL7</span>
-              <span className="sh-metric-label">Interoperability Gateway</span>
+              <span className="sh-metric-val">Appointments</span>
+              <span className="sh-metric-label">Saved status and visit information</span>
             </div>
           </div>
         </div>
@@ -326,7 +326,7 @@ export default function Landing() {
               Smart Healthcare <span className="text-gradient-cyan">Ecosystem</span>
             </h2>
             <p className="sh-section-subtitle">
-              A synchronized data pipeline that seamlessly orchestrates patient intake, clinical diagnosis, electronic prescriptions, and hospital intelligence.
+              Patient accounts, doctor appointment requests, appointment status, and doctor-entered visit information are connected to the database. Other screens are previews.
             </p>
           </div>
 
@@ -384,7 +384,7 @@ export default function Landing() {
               <div className="sh-hub-core">
                 <HeartPulse size={36} className="text-cyan sh-pulse-icon" />
                 <span className="sh-hub-title">SmartHospital Core Node</span>
-                <span className="sh-hub-subtitle">Dual DB & FHIR Broker</span>
+              <span className="sh-hub-subtitle">Account & appointment API</span>
               </div>
             </div>
 
@@ -421,7 +421,7 @@ export default function Landing() {
               Platform <span className="text-gradient-cyan">Capabilities</span>
             </h2>
             <p className="sh-section-subtitle">
-              Engineered to meet the stringent security, clinical fidelity, and operational demands of modern healthcare institutions.
+              Account and appointment workflows are connected. The remaining clinical modules are visual previews for this project demo.
             </p>
           </div>
 
@@ -457,7 +457,7 @@ export default function Landing() {
               Select Your <span className="text-gradient-cyan">Portal Entry</span>
             </h2>
             <p className="sh-section-subtitle">
-              Each healthcare stakeholder receives a distinct, specialized workspace tailored to their exact clinical or operational workflow.
+              Sign in by role. Patients can book appointments; doctors manage assigned visits; administrators provision doctor accounts.
             </p>
           </div>
 
@@ -536,7 +536,7 @@ export default function Landing() {
                 Ready to Experience <span className="text-gradient-cyan">SmartHealthcare</span>?
               </h2>
               <p className="sh-cta-desc">
-                Step into the future of connected healthcare delivery, digital medical records, and smart hospital operations.
+                Try the appointment workflow. Sample clinical pages are for demonstration only.
               </p>
               <button
                 type="button"
@@ -565,12 +565,12 @@ export default function Landing() {
               </span>
             </div>
             <p className="sh-footer-desc">
-              Next-generation hospital data exchange and clinical analytics platform. Engineered with dual-database persistence and FHIR R4 interoperability.
+              Student project demo with patient registration, saved appointments, and appointment-linked doctor notes. Do not enter real patient data.
             </p>
             <div className="sh-compliance-badges">
-              <span className="sh-comp-pill"><ShieldCheck size={13} className="text-success" /> HIPAA Aligned</span>
+              <span className="sh-comp-pill"><ShieldCheck size={13} className="text-success" /> Demo only</span>
               <span className="sh-comp-pill"><Lock size={13} className="text-cyan" /> JWT / Bcrypt</span>
-              <span className="sh-comp-pill"><Server size={13} className="text-teal" /> FHIR R4 & HL7</span>
+              <span className="sh-comp-pill"><Server size={13} className="text-teal" /> Appointment API</span>
             </div>
           </div>
 
@@ -597,8 +597,8 @@ export default function Landing() {
           <div className="sh-footer-nav-col">
             <h4 className="sh-footer-heading">Architecture</h4>
             <ul className="sh-footer-links">
-              <li><span>MySQL 8.4 InnoDB Core</span></li>
-              <li><span>MongoDB 6.0+ Document Core</span></li>
+              <li><span>PostgreSQL on Render</span></li>
+              <li><span>SQLite for local development</span></li>
               <li><span>FastAPI REST Subsystem</span></li>
               <li><span>Vite & React 19 Frontend</span></li>
             </ul>
@@ -609,7 +609,7 @@ export default function Landing() {
           <p>© 2026 SmartHealthcare Platform. All clinical and operational rights reserved.</p>
           <div className="sh-footer-bottom-badges">
             <span className="pulse-dot-green" />
-            <span>Hospital Services Operational (24/7/365)</span>
+            <span>Demo service availability depends on hosting plan</span>
           </div>
         </div>
       </footer>

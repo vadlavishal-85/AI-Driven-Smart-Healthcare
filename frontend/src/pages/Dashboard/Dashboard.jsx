@@ -43,6 +43,9 @@ export default function Dashboard() {
   if (userRole === 'DOCTOR') {
     return (
       <DashboardLayout>
+        <div className="auth-alert-info" role="note">
+          Dashboard cards contain sample preview data. Use Appointments for saved visits and clinical information. Do not enter real patient data.
+        </div>
         <DoctorDashboard currentUser={currentUser} navigate={navigate} />
       </DashboardLayout>
     );
@@ -51,6 +54,9 @@ export default function Dashboard() {
   if (userRole === 'PATIENT') {
     return (
       <DashboardLayout>
+        <div className="auth-alert-info" role="note">
+          Dashboard cards contain sample preview data. Use Appointments to book visits and view your saved information. Do not enter real patient data.
+        </div>
         <PatientDashboard currentUser={currentUser} navigate={navigate} />
       </DashboardLayout>
     );
@@ -58,6 +64,9 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
+      <div className="auth-alert-info" role="note">
+        Dashboard cards contain sample preview data. Use Appointments for saved visit information and administer doctor accounts through the API. Do not enter real patient data.
+      </div>
       <AdminDashboard currentUser={currentUser} navigate={navigate} />
     </DashboardLayout>
   );
@@ -151,14 +160,14 @@ function DoctorDashboard({ currentUser, navigate }) {
               <Stethoscope size={14} /> Clinical Workspace
             </span>
             <span className="live-status-pill">
-              <span className="pulse-dot-green" /> On-Duty Clinical Session
+              <span className="pulse-dot-green" /> Appointment Workflow Demo
             </span>
           </div>
           <h1 className="dash-hero-title">
             {greeting}, <span className="text-teal">{doctorName}</span>
           </h1>
           <p className="dash-hero-subtitle">
-            Today's Clinical Overview • Department of Cardiology & Internal Medicine • Clinical Suite 402
+            Review appointments assigned to your doctor account and record visit information.
           </p>
         </div>
 
@@ -175,7 +184,7 @@ function DoctorDashboard({ currentUser, navigate }) {
             size="sm"
             onClick={() => navigate('/clinical-notes')}
           >
-            <PlusCircle size={15} /> New Clinical Note
+            <PlusCircle size={15} /> Review Visit Notes
           </Button>
         </div>
       </div>
@@ -382,7 +391,7 @@ function PatientDashboard({ currentUser, navigate }) {
             {greeting}, <span className="text-primary">{patientName}</span>
           </h1>
           <p className="dash-hero-subtitle">
-            Your healthcare, connected. Access your medical records, upcoming consultations, and prescriptions securely.
+            Book appointments and review information attached to your own visits.
           </p>
         </div>
 
@@ -605,14 +614,14 @@ function AdminDashboard({ currentUser, navigate }) {
           <div className="dash-badge-row">
             <span className="adm-hero-badge">Smart Hospital Operations</span>
             <span className="live-status-pill">
-              <span className="pulse-dot-green" /> Dual Database Online (MySQL + MongoDB)
+              <span className="pulse-dot-green" /> Appointment Database Connected
             </span>
           </div>
           <h1 className="dash-hero-title">
             Hospital Operations — <span className="text-cyan">{adminName}</span>
           </h1>
           <p className="dash-hero-subtitle">
-            Enterprise clinical telemetry, practitioner directories, database sync metrics, and FHIR interoperability gateways.
+            Provision doctor accounts and check the database used by the appointment workflow. Other dashboard cards are previews.
           </p>
         </div>
 
@@ -622,7 +631,7 @@ function AdminDashboard({ currentUser, navigate }) {
             size="sm"
             onClick={() => window.open(`${API_BASE_URL}/database/health`, '_blank', 'noopener,noreferrer')}
           >
-            <RefreshCw size={14} /> Verify Dual DB
+            <RefreshCw size={14} /> Check Database Health
           </Button>
           <Button
             variant="primary"
@@ -679,11 +688,11 @@ function AdminDashboard({ currentUser, navigate }) {
         <Card className="dash-panel-card">
           <div className="panel-header">
             <div>
-              <h3>Dual-Database Persistence Engine Status</h3>
-              <p>Real-time relational & document storage operational telemetry</p>
+              <h3>Database Configuration</h3>
+              <p>Appointment and account workflows use the configured SQL database.</p>
             </div>
             <Badge variant="success" size="sm" dot>
-              All Engines Connected
+              Sample Preview
             </Badge>
           </div>
 
@@ -691,26 +700,26 @@ function AdminDashboard({ currentUser, navigate }) {
             <div className="adm-db-card">
               <div className="adm-db-header">
                 <Database size={20} className="text-primary" />
-                <h4>MySQL 8.4 Community Server</h4>
-                <Badge variant="primary" size="sm">InnoDB ACID</Badge>
+                <h4>Appointment Workflow</h4>
+                <Badge variant="primary" size="sm">Database-backed</Badge>
               </div>
               <ul className="adm-db-specs">
-                <li>• Managed Tables: users, roles, patients, doctors, appointments</li>
-                <li>• Foreign Key Integrity: Enforced across all relational entities</li>
-                <li>• Query Latency: 2.4 ms average response</li>
+                <li>• User accounts, roles, doctor profiles, and appointments are stored</li>
+                <li>• Appointment access is limited by patient and assigned doctor role</li>
+                <li>• Database health can be checked with the button above</li>
               </ul>
             </div>
 
             <div className="adm-db-card">
               <div className="adm-db-header">
                 <Database size={20} className="text-teal" />
-                <h4>MongoDB 6.0+ Cluster</h4>
-                <Badge variant="teal" size="sm">Document Core</Badge>
+                <h4>Other Clinical Modules</h4>
+                <Badge variant="teal" size="sm">Preview only</Badge>
               </div>
               <ul className="adm-db-specs">
-                <li>• Collections: medical_records, clinical_notes, prescriptions, exchange</li>
-                <li>• Schema Flexibility: Rich JSON & nested diagnostic arrays</li>
-                <li>• Query Latency: 3.1 ms on indexed fields</li>
+                <li>• Medical records, prescriptions, analytics, and data exchange show sample content</li>
+                <li>• Those modules are not connected to saved clinical data</li>
+                <li>• Do not use previews for patient care decisions</li>
               </ul>
             </div>
           </div>
@@ -720,8 +729,8 @@ function AdminDashboard({ currentUser, navigate }) {
         <Card className="dash-panel-card">
           <div className="panel-header">
             <div>
-              <h3>Recent Interoperability Transactions</h3>
-              <p>Cross-network FHIR R4 and HL7 v2 payloads</p>
+              <h3>Data Exchange Preview</h3>
+              <p>Sample content only; external healthcare exchange is not configured</p>
             </div>
             <Button
               variant="ghost"

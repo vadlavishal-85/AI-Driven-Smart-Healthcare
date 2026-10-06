@@ -8,8 +8,8 @@ The Render Blueprint creates a static React site, a FastAPI service, and a manag
 2. Confirm the resource plans before creating them. The checked-in Blueprint uses Render's free web service and Postgres plans for a review/demo deployment.
 3. Wait for the API `/ready` check and frontend build to pass. Render assigns these URLs from the current names:
    - Frontend: `https://smarthealthcare-frontend.onrender.com`
-   - API: `https://smarthealthcare-api.onrender.com`
-4. Verify `/health`, `/ready`, `/database/health`, and `/docs` on the API URL. Sign in with the bootstrap administrator account using `admin@smarthealthcare.local` and the generated `BOOTSTRAP_ADMIN_PASSWORD` shown in the Render service environment. Use the secured `POST /admin/doctors` endpoint in `/docs` to add at least one real doctor. Register a patient account, book an appointment, sign in as the assigned doctor, update the status and clinical information, then sign back in as the patient to verify that visit details are visible.
+   - API: `https://smarthealthcare-api-6ebh.onrender.com`
+4. Verify `/health`, `/ready`, `/database/health`, and `/docs` on the API URL. When `ENABLE_DEMO_ACCOUNTS=true`, the API creates the patient, doctor, and admin demo accounts using the three generated `DEMO_*_PASSWORD` values in the Render service environment. These are public presentation accounts and must only be used with fictional data. For normal use, sign in with the bootstrap administrator and provision doctors through `POST /admin/doctors` in `/docs`.
 
 If Render reports that a service name is already taken, update both the corresponding names and URL values in `render.yaml`, then sync again. Keep `CORS_ORIGINS` set to the exact deployed frontend origin.
 
@@ -25,4 +25,4 @@ Patient registration, login, role checks, profile updates, and password changes 
 
 Only appointment and account workflows are backed by the API. Other module pages such as medical-record search, prescriptions, analytics, and data exchange remain demonstration content; do not rely on them for real operations or clinical decisions.
 
-The supplied GitHub repository currently contains presentation files. Include this website source tree in the repository before syncing the Blueprint. Never commit `.env` files, database credentials, access tokens, or real patient information.
+The GitHub repository contains the website source tree and Render Blueprint. Never commit `.env` files, database credentials, access tokens, or real patient information.

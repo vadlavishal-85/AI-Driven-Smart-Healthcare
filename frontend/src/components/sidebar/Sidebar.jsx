@@ -17,6 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import './Sidebar.css';
+import { useAuth } from '../../context/useAuth';
 
 const navItems = [
   { name: 'Overview', path: '/dashboard', icon: LayoutDashboard },
@@ -24,7 +25,7 @@ const navItems = [
   { name: 'Doctors', path: '/dashboard/doctors', icon: Stethoscope },
   { name: 'Appointments', path: '/dashboard/appointments', icon: Calendar },
   { name: 'Medical Records', path: '/dashboard/records', icon: FileText },
-  { name: 'Data Exchange', path: '/dashboard/exchange', icon: ArrowLeftRight, badge: 'HL7/FHIR' },
+  { name: 'Data Exchange', path: '/dashboard/exchange', icon: ArrowLeftRight, badge: 'Preview' },
   { name: 'Analytics', path: '/dashboard/analytics', icon: BarChart3 },
 ];
 
@@ -40,9 +41,10 @@ export default function Sidebar({
   onCloseMobile,
 }) {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    // Return to landing page
+    logout();
     navigate('/');
   };
 

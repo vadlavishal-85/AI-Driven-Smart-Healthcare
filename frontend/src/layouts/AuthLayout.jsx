@@ -17,10 +17,11 @@ export default function AuthLayout({ children, title, subtitle }) {
           </Link>
 
           <div className="sh-auth-hero-text">
-            <h2>One unified ecosystem for modern healthcare data & analytics.</h2>
+            <h2>A connected workspace for patient accounts and appointments.</h2>
             <p>
-              Connect patient profiles, medical documentation, clinical schedules,
-              and cross-system data exchange into a secure, role-governed platform.
+              Patients can book visits and review their own appointment details.
+              Doctors can manage assigned visits and add clinical notes. This demo is
+              not intended for real patient information.
             </p>
           </div>
 
@@ -31,7 +32,7 @@ export default function AuthLayout({ children, title, subtitle }) {
             </div>
             <div className="sh-auth-feature-pill">
               <Database size={18} className="text-primary" />
-              <span>Dual MySQL & MongoDB Architecture</span>
+              <span>PostgreSQL on Render · SQLite locally</span>
             </div>
             <div className="sh-auth-feature-pill">
               <Zap size={18} className="text-accent" />
@@ -39,7 +40,7 @@ export default function AuthLayout({ children, title, subtitle }) {
             </div>
             <div className="sh-auth-feature-pill">
               <Lock size={18} className="text-secondary" />
-              <span>End-to-End Cryptographic Security</span>
+              <span>Hashed Passwords & Role-Based Access</span>
             </div>
           </div>
         </div>

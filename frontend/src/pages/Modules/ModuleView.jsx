@@ -12,7 +12,6 @@ import {
   Zap,
   CheckCircle2,
   Search,
-  Clock,
   MapPin,
   Mail,
   Lock,
@@ -33,7 +32,7 @@ import { useAuth } from '../../context/useAuth';
 import { apiFetch } from '../../services/api';
 
 // ============================================================================
-// REAL DATA & CLINICAL CATALOGS (Aligned with MySQL & MongoDB Schemas)
+// Sample content used only by the preview-only modules below.
 // ============================================================================
 
 const PATIENTS_DATA = [
@@ -103,65 +102,6 @@ const PATIENTS_DATA = [
   },
 ];
 
-const DOCTORS_DATA = [
-  {
-    id: 'DOC-101',
-    name: 'Dr. Robert Chen, MD, FACC',
-    specialty: 'Cardiovascular Disease & Interventional Cardiology',
-    department: 'Cardiology',
-    experience: '14 Years Experience',
-    education: 'Harvard Medical School • Johns Hopkins Fellow',
-    room: 'Clinical Suite 402',
-    hours: 'Mon - Thu: 09:00 - 15:30',
-    status: 'Available Today',
-    email: 'robert.chen@smarthealth.org',
-    rating: '4.95 / 5.0 (140+ reviews)',
-    activePatients: 28,
-  },
-  {
-    id: 'DOC-102',
-    name: 'Dr. Sarah Patel, MD, PhD',
-    specialty: 'Clinical Neurology & Neuro-Pathology',
-    department: 'Neurology',
-    experience: '11 Years Experience',
-    education: 'Stanford University School of Medicine',
-    room: 'Clinical Suite 308',
-    hours: 'Tue - Fri: 08:30 - 16:00',
-    status: 'In Consultation',
-    email: 'sarah.patel@smarthealth.org',
-    rating: '4.92 / 5.0 (98 reviews)',
-    activePatients: 22,
-  },
-  {
-    id: 'DOC-103',
-    name: 'Dr. Marcus Vance, MD',
-    specialty: 'Pediatric Intensive Care & Neonatology',
-    department: 'Pediatrics',
-    experience: '16 Years Experience',
-    education: 'Columbia University Vagelos College',
-    room: 'Children Pavilion 201',
-    hours: 'Mon - Fri: 08:00 - 14:30',
-    status: 'Available Today',
-    email: 'marcus.vance@smarthealth.org',
-    rating: '4.98 / 5.0 (210+ reviews)',
-    activePatients: 34,
-  },
-  {
-    id: 'DOC-104',
-    name: 'Dr. Elena Rostova, MD',
-    specialty: 'Pulmonology & Critical Care Medicine',
-    department: 'Pulmonology',
-    experience: '9 Years Experience',
-    education: 'UCSF School of Medicine',
-    room: 'Pulmonary Suite 512',
-    hours: 'Wed - Sat: 10:00 - 18:00',
-    status: 'Telehealth Open',
-    email: 'elena.rostova@smarthealth.org',
-    rating: '4.89 / 5.0 (85 reviews)',
-    activePatients: 19,
-  },
-];
-
 const RECORDS_DATA = [
   {
     id: 'EMR-2026-0941',
@@ -198,33 +138,6 @@ const RECORDS_DATA = [
     observations: 'HbA1c: 7.8%. Monofilament sensory testing reveals decreased vibration in great toes.',
     treatment: 'Continue Metformin 500mg BID. Prescribe Pregabalin 75mg QHS. Nutrition consult.',
     reports: ['Comprehensive-Metabolic-Panel.pdf', 'HbA1c-Glycemic-Report.pdf'],
-  },
-];
-
-const NOTES_DATA = [
-  {
-    id: 'NOTE-8821',
-    date: 'Oct 05, 2026',
-    time: '14:30 EST',
-    patient: 'Sophia Williams (PAT-8804)',
-    doctor: 'Dr. Elena Rostova, MD',
-    type: 'SOAP Daily Progress Note',
-    subjective: 'Patient reports improved ease of breathing following nebulizer therapy. Cough is now non-productive.',
-    objective: 'RR: 18 bpm, SpO2: 97% on room air. Lungs clear to auscultation bilaterally with minimal end-expiratory wheeze.',
-    assessment: 'Acute asthma exacerbation resolving satisfactorily.',
-    plan: 'Wean albuterol nebulization to PRN. Discharge planning initiated for tomorrow morning.',
-  },
-  {
-    id: 'NOTE-8822',
-    date: 'Oct 02, 2026',
-    time: '11:00 EST',
-    patient: 'John Doe (PAT-8801)',
-    doctor: 'Dr. Robert Chen, MD',
-    type: 'Cardiology Consultation Note',
-    subjective: 'Patient presents for routine quarterly hypertension follow-up. Complains of mild headaches.',
-    objective: 'BP: 142/88 mmHg. Weight: 84 kg. Peripheral pulses 2+ symmetric.',
-    assessment: 'Suboptimally controlled Stage 2 Essential Hypertension.',
-    plan: 'Increase Amlodipine to 10mg daily. Repeat BMP in 4 weeks. DASH diet counseling provided.',
   },
 ];
 
@@ -386,6 +299,7 @@ export default function ModuleView() {
   });
   const isPatient = currentUser?.role === 'PATIENT';
   const isDoctor = currentUser?.role === 'DOCTOR';
+  const requestedDoctorId = new URLSearchParams(location.search).get('doctorId') || '';
 
   const loadAppointments = useCallback(async () => {
     setAppointmentsLoading(true);
@@ -405,8 +319,14 @@ export default function ModuleView() {
   }, []);
 
   useEffect(() => {
-    if (location.pathname === '/appointments') void Promise.resolve().then(loadAppointments);
-  }, [location.pathname, loadAppointments]);
+    if (['/appointments', '/doctors', '/clinical-notes'].includes(location.pathname)) {
+      void Promise.resolve().then(loadAppointments);
+    }
+    if (location.pathname === '/appointments' && requestedDoctorId && isPatient) {
+      const timer = window.setTimeout(() => setNewModalOpen(true), 0);
+      return () => window.clearTimeout(timer);
+    }
+  }, [location.pathname, location.search, requestedDoctorId, isPatient, loadAppointments]);
 
   const pathname = location.pathname;
 
@@ -422,7 +342,7 @@ export default function ModuleView() {
       case '/medical-records':
         return renderMedicalRecordsView();
       case '/clinical-notes':
-        return renderClinicalNotesView();
+        return renderAppointmentsView();
       case '/prescriptions':
         return renderPrescriptionsView();
       case '/data-exchange':
@@ -589,74 +509,55 @@ export default function ModuleView() {
   // 2. DOCTORS DIRECTORY
   // --------------------------------------------------------------------------
   const renderDoctorsView = () => {
-    const filtered = DOCTORS_DATA.filter((d) => {
-      return (
-        d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        d.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        d.specialty.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    });
+    const filtered = doctors.filter((doctor) => (
+      doctor.name.toLowerCase().includes(searchQuery.toLowerCase())
+      || doctor.department.toLowerCase().includes(searchQuery.toLowerCase())
+      || doctor.specialty.toLowerCase().includes(searchQuery.toLowerCase())
+    ));
 
     return (
       <div className="module-subsystem-wrapper animate-fade-up">
         <div className="module-header-card">
           <div className="module-header-info">
             <div className="module-badge-row">
-              <Badge variant="teal" size="sm" dot>
-                Physician Credential Registry
-              </Badge>
-              <span className="module-entity-count">{filtered.length} Specialists</span>
+              <Badge variant="teal" size="sm" dot>Bookable Doctor Directory</Badge>
+              <span className="module-entity-count">{filtered.length} Doctors</span>
             </div>
             <h1 className="module-title">Medical Staff & Specialists Directory</h1>
             <p className="module-subtitle">
-              Board-certified practitioners, consultation rosters, department affiliations, and appointment availability.
+              Doctors listed here have active accounts and can receive appointment requests.
             </p>
           </div>
         </div>
 
-        {/* Doctors Grid */}
+        {appointmentError && <p className="module-subtitle" role="alert">{appointmentError}</p>}
         <div className="doctors-cards-grid">
-          {filtered.map((doc) => (
-            <Card key={doc.id} className="doctor-profile-card" hoverable>
+          {appointmentsLoading && <Card>Loading doctors…</Card>}
+          {!appointmentsLoading && filtered.length === 0 && !appointmentError && (
+            <Card>No active doctors are available yet. An administrator must provision a doctor account.</Card>
+          )}
+          {!appointmentsLoading && filtered.map((doctor) => (
+            <Card key={doctor.id} className="doctor-profile-card" hoverable>
               <div className="doc-card-top">
-                <div className="doc-avatar-large">
-                  <Stethoscope size={28} className="text-teal" />
-                </div>
+                <div className="doc-avatar-large"><Stethoscope size={28} className="text-teal" /></div>
                 <div className="doc-main-meta">
-                  <Badge variant="teal" size="sm">{doc.department}</Badge>
-                  <h3 className="doc-full-name">{doc.name}</h3>
-                  <span className="doc-specialty-line">{doc.specialty}</span>
-                  <span className="doc-rating-badge">★ {doc.rating}</span>
+                  <Badge variant="teal" size="sm">{doctor.department}</Badge>
+                  <h3 className="doc-full-name">{doctor.name}</h3>
+                  <span className="doc-specialty-line">{doctor.specialty}</span>
                 </div>
               </div>
 
               <div className="doc-card-details">
-                <div className="doc-detail-item">
-                  <MapPin size={14} className="text-muted" />
-                  <span>{doc.room}</span>
-                </div>
-                <div className="doc-detail-item">
-                  <Clock size={14} className="text-muted" />
-                  <span>{doc.hours}</span>
-                </div>
-                <div className="doc-detail-item">
-                  <Mail size={14} className="text-muted" />
-                  <span>{doc.email}</span>
-                </div>
+                <div className="doc-detail-item"><Mail size={14} className="text-muted" /><span>{doctor.email}</span></div>
               </div>
 
               <div className="doc-card-footer">
-                <div className="doc-status-indicator">
-                  <span className="pulse-dot-green" />
-                  <span>{doc.status}</span>
-                </div>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => navigate('/appointments')}
-                >
-                  Book Consultation
-                </Button>
+                <div className="doc-status-indicator"><span className="pulse-dot-green" /><span>Accepting appointment requests</span></div>
+                {isPatient && (
+                  <Button variant="primary" size="sm" onClick={() => navigate(`/appointments?doctorId=${doctor.id}`)}>
+                    Book Consultation
+                  </Button>
+                )}
               </div>
             </Card>
           ))}
@@ -1000,90 +901,6 @@ export default function ModuleView() {
                       <Download size={13} /> {r}
                     </span>
                   ))}
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  // --------------------------------------------------------------------------
-  // 5. CLINICAL NOTES (SOAP PROGRESS NOTES)
-  // --------------------------------------------------------------------------
-  const renderClinicalNotesView = () => {
-    return (
-      <div className="module-subsystem-wrapper animate-fade-up">
-        <div className="module-header-card">
-          <div className="module-header-info">
-            <div className="module-badge-row">
-              <Badge variant="cyan" size="sm" dot>
-                SOAP Progress Notes
-              </Badge>
-              <span className="module-entity-count">{NOTES_DATA.length} Sealed Notes</span>
-            </div>
-            <h1 className="module-title">Clinical Progress & SOAP Notes</h1>
-            <p className="module-subtitle">
-              Standardized clinical progress notes (Subjective, Objective, Assessment, Plan) authored by attending physicians.
-            </p>
-          </div>
-
-          <div className="module-actions-row">
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => alert('Opening SOAP note creation workspace...')}
-            >
-              <PlusCircle size={15} /> Author SOAP Note
-            </Button>
-          </div>
-        </div>
-
-        <div className="notes-cards-stream">
-          {NOTES_DATA.map((note) => (
-            <Card key={note.id} className="soap-note-card" hoverable>
-              <div className="soap-header-row">
-                <div className="soap-title-group">
-                  <Badge variant="primary" size="sm">{note.type}</Badge>
-                  <strong className="soap-id">{note.id}</strong>
-                  <span className="soap-time">{note.date} at {note.time}</span>
-                </div>
-                <span className="soap-doc-tag">{note.doctor}</span>
-              </div>
-
-              <div className="soap-patient-banner">
-                <span>Patient Subject: <strong>{note.patient}</strong></span>
-              </div>
-
-              <div className="soap-grid">
-                <div className="soap-cell soap-s">
-                  <span className="soap-letter">S</span>
-                  <div>
-                    <h5 className="soap-cell-title">Subjective</h5>
-                    <p>{note.subjective}</p>
-                  </div>
-                </div>
-                <div className="soap-cell soap-o">
-                  <span className="soap-letter">O</span>
-                  <div>
-                    <h5 className="soap-cell-title">Objective</h5>
-                    <p>{note.objective}</p>
-                  </div>
-                </div>
-                <div className="soap-cell soap-a">
-                  <span className="soap-letter">A</span>
-                  <div>
-                    <h5 className="soap-cell-title">Assessment</h5>
-                    <p>{note.assessment}</p>
-                  </div>
-                </div>
-                <div className="soap-cell soap-p">
-                  <span className="soap-letter">P</span>
-                  <div>
-                    <h5 className="soap-cell-title">Plan</h5>
-                    <p>{note.plan}</p>
-                  </div>
                 </div>
               </div>
             </Card>
@@ -1464,5 +1281,23 @@ export default function ModuleView() {
     );
   };
 
-  return <DashboardLayout>{renderModuleContent()}</DashboardLayout>;
+  const previewOnlyPaths = new Set([
+    '/patients',
+    '/medical-records',
+    '/prescriptions',
+    '/data-exchange',
+    '/analytics',
+    '/settings',
+  ]);
+
+  return (
+    <DashboardLayout>
+      {previewOnlyPaths.has(pathname) && (
+        <div className="auth-alert-info" role="note">
+          Sample preview only. This page is not connected to stored clinical data. Use Appointments for saved visit information. Do not enter real patient data.
+        </div>
+      )}
+      {renderModuleContent()}
+    </DashboardLayout>
+  );
 }

@@ -144,11 +144,11 @@ export default function Register() {
                     Verified Portal Registration
                   </Badge>
                   <span className="sh-security-badge">
-                    <ShieldCheck size={13} className="text-success" /> HIPAA/Role Ready
+                    <ShieldCheck size={13} className="text-success" /> Patient Role Only
                   </span>
                 </div>
                 <h2>Create Patient Account</h2>
-                <p>Register as a patient to manage medical charts, consultations, and records.</p>
+                <p>Create a patient account to book appointments and view your own visit information. Demo only; do not enter real patient data.</p>
               </div>
             </div>
 
