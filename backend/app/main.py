@@ -11,7 +11,6 @@ from app.appointments.router import router as appointments_router
 from app.admin.router import router as admin_router
 from app.patients.router import router as patients_router
 from app.prescription_notes.router import router as prescription_notes_router
-from app.database.mongodb import check_mongodb_connection
 from app.database.mysql import (
     Base,
     DatabaseUnavailableError,
@@ -229,11 +228,9 @@ def readiness_check():
 @app.get("/database/health", tags=["System"])
 def database_health():
     database_ok, _ = check_database_connection()
-    mongo_ok, mongo_msg = check_mongodb_connection()
 
     return {
         "relational_database": "connected" if database_ok else "unavailable",
-        "mongodb": "connected" if mongo_ok else "optional / not configured",
     }
 
 

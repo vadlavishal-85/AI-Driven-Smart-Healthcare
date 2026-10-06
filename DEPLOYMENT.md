@@ -15,7 +15,7 @@ If Render reports that a service name is already taken, update both the correspo
 
 ## Database and privacy limits
 
-The Blueprint provisions PostgreSQL, so a separate MySQL or MongoDB service is not required for the implemented APIs. PostgreSQL is selected through `DATABASE_URL`; local MySQL remains supported with `APP_DATABASE_BACKEND=mysql`. Local development defaults to a persistent SQLite file so a fresh checkout works without a database server. MongoDB health is informational and optional because current API routes do not use MongoDB.
+The Blueprint provisions PostgreSQL for the implemented APIs. PostgreSQL is selected through `DATABASE_URL`; local MySQL remains supported with `APP_DATABASE_BACKEND=mysql`. Local development defaults to a persistent SQLite file so a fresh checkout works without a database server.
 
 Render's free PostgreSQL database expires 30 days after creation, has no backups, and is documented for testing/hobby use rather than production. The free app services can spin down when idle. Do not store real patient information or clinical data in this demo deployment. For a durable live system, use a paid database plan with backups, access controls, and an appropriate healthcare privacy/compliance review before handling real patient data.
 

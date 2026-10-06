@@ -35,7 +35,7 @@ export default function HealthcareNetwork() {
       title: 'Clinical Records',
       subtitle: 'EMR, SOAP Notes & Diagnostics',
       icon: FileText,
-      badge: 'MongoDB Store',
+      badge: 'Record Preview',
       theme: 'cyan',
       glow: 'glow-cyan',
     },

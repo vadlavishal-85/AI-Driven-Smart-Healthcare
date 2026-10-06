@@ -11,7 +11,6 @@ A professional, real-world healthcare web application designed for managing and 
 - **Backend**: FastAPI - Python
 - **Databases**:
   - Relational Database: PostgreSQL on Render, SQLite for local development, or MySQL when explicitly configured
-  - MongoDB: optional; no current healthcare API depends on it
 
 ---
 
@@ -21,7 +20,7 @@ A professional, real-world healthcare web application designed for managing and 
 - The FastAPI backend implements patient registration, login, role checks, profile/password APIs, doctor provisioning by administrators, and database-backed appointments.
 - Patients can book with active doctors, view only their appointments, cancel eligible bookings, and read clinical information attached to their visits. Assigned doctors can confirm/close visits and record diagnosis, treatment plan, and clinical notes.
 - Patient/doctor dashboards, medical-record search, SOAP notes, prescriptions, data exchange, and analytics still use sample content. These screens are not production clinical workflows.
-- Render uses PostgreSQL through `DATABASE_URL`. Local development automatically creates a persistent SQLite database; set `APP_DATABASE_BACKEND=mysql` to use the legacy local MySQL configuration. MongoDB is optional because current API routes do not use it.
+- Render uses PostgreSQL through `DATABASE_URL`. Local development automatically creates a persistent SQLite database; set `APP_DATABASE_BACKEND=mysql` to use the legacy local MySQL configuration.
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for the Render deployment setup and current prerequisites.
 See [docs/BACKEND_OVERVIEW.md](docs/BACKEND_OVERVIEW.md) for the live backend architecture, database tables, API map, and faculty demonstration steps.
@@ -66,7 +65,6 @@ SmartHealthcare/
 │
 ├── database/
 │   ├── mysql/
-│   └── mongodb/
 │
 ├── docs/
 │   └── README.md

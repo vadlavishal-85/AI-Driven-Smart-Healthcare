@@ -7,7 +7,6 @@ flowchart LR
   U[Patient / Doctor / Admin browser] --> F[React + Vite frontend on Render]
   F -->|HTTPS API requests + JWT| A[FastAPI + Uvicorn API on Render]
   A -->|SQLAlchemy using DATABASE_URL| P[(Render PostgreSQL\nsmarthealthcare)]
-  A -. optional; not configured .-> M[(MongoDB)]
 ```
 
 The frontend is a Render static site. The Python API is a separate Render web service. The database is a third Render resource named `smarthealthcare-db`, in the Singapore region. Its database name is `smarthealthcare`. The Blueprint connects the API to it through the `DATABASE_URL` environment variable, so the real connection URL and password do not belong in source control or presentation slides.
@@ -23,7 +22,6 @@ The frontend is a Render static site. The Python API is a separate Render web se
 - **SQLite** is the default local development database. A legacy MySQL connection option remains available through PyMySQL.
 - **bcrypt** hashes passwords before storage.
 - **JWT (HS256)** provides signed, expiring bearer tokens; the configured token lifetime is 30 minutes.
-- **PyMongo** can ping an optional MongoDB URI, but the current API workflows do not read or write MongoDB.
 - **CORS middleware** allows the deployed frontend origin and local development origins.
 
 The database module is still named `backend/app/database/mysql.py` for compatibility. It supports PostgreSQL, SQLite, and optional MySQL; the live Render database is PostgreSQL.
@@ -42,7 +40,7 @@ The API creates its SQLAlchemy model tables at startup with `Base.metadata.creat
 
 Appointment status values are `SCHEDULED`, `CONFIRMED`, `COMPLETED`, `CANCELLED`, and `NO_SHOW`. There is no separate clinical-notes table: the three clinical fields are columns on `appointments`.
 
-There are **no live tables** for prescriptions, medical records, analytics, data-exchange transactions, video consultations, or audit history. Those frontend pages contain sample preview data; they are not database-backed healthcare workflows. MongoDB collections described under `database/mongodb/` are design notes only.
+There are **no live tables** for prescriptions, medical records, analytics, data-exchange transactions, video consultations, or audit history. Those frontend pages contain sample preview data; they are not database-backed healthcare workflows.
 
 ## API map
 
@@ -51,7 +49,7 @@ There are **no live tables** for prescriptions, medical records, analytics, data
 | `GET /` | API service status |
 | `GET /health` | Liveness check |
 | `GET /ready` | Readiness check that requires PostgreSQL connectivity |
-| `GET /database/health` | Shows relational DB connection and optional MongoDB status |
+| `GET /database/health` | Shows relational database connection status |
 | `GET /docs` | Interactive Swagger API documentation |
 | `POST /auth/register` | Public patient registration; other roles cannot self-register |
 | `POST /auth/login` | Verify credentials and issue JWT |

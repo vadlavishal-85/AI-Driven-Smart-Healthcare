@@ -215,7 +215,7 @@ const AUDIT_EVENTS_DATA = [
     time: '2026-10-06 03:15:22 UTC',
     type: 'EMR_DOCUMENT_SEALED',
     actor: 'Dr. Sarah Patel, MD',
-    action: 'Electronic Record EMR-2026-0942 indexed in MongoDB',
+    action: 'Electronic Record EMR-2026-0942 added to the sample preview',
     status: 'SUCCESS',
   },
 ];
@@ -1294,7 +1294,7 @@ export default function ModuleView() {
           <div className="module-header-info">
             <div className="module-badge-row">
               <Badge variant="teal" size="sm" dot>
-                MongoDB Document Collection
+                Clinical Record Preview
               </Badge>
               <span className="module-entity-count">{RECORDS_DATA.length} Verified Records</span>
             </div>
