@@ -1,0 +1,3 @@
+"""
+SmartHealthcare Database Package
+"""

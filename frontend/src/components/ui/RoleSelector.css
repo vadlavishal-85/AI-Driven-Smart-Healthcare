@@ -1,0 +1,196 @@
+/* =====================================================================
+   Circular Role Selector Stylesheet
+   ===================================================================== */
+
+.sh-role-selector-container {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.sh-role-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  align-items: stretch;
+}
+
+/* Role Card */
+.sh-role-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 2.5rem 1.75rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-smooth);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  outline: none;
+  user-select: none;
+}
+
+.sh-role-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 35px -8px rgba(2, 132, 199, 0.18);
+  border-color: var(--clinical-cyan);
+}
+
+/* Circular Icon Container */
+.sh-role-circle-wrapper {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.sh-role-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--surface-soft);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  transition: all 0.3s var(--ease-smooth);
+  position: relative;
+  box-shadow: var(--shadow-xs);
+}
+
+.sh-role-card:hover .sh-role-circle {
+  transform: scale(1.08);
+  box-shadow: var(--glow-cyan);
+}
+
+.sh-role-icon {
+  transition: transform 0.3s var(--ease-smooth);
+}
+
+.sh-role-card:hover .sh-role-icon {
+  transform: scale(1.1);
+}
+
+/* Role Themes */
+.theme-teal .sh-role-circle {
+  background: var(--hospital-teal-light);
+  color: var(--hospital-teal-dark);
+  border-color: #99f6e4;
+}
+
+.theme-blue .sh-role-circle {
+  background: var(--medical-blue-light);
+  color: var(--medical-blue-dark);
+  border-color: #bae6fd;
+}
+
+.theme-navy .sh-role-circle {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+/* Checkmark Bubble */
+.sh-role-check-bubble {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--success);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4);
+}
+
+/* Text Content */
+.sh-role-badge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  margin-bottom: 0.65rem;
+}
+
+.sh-role-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.sh-role-desc {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.sh-role-action-prompt {
+  margin-top: auto;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 0.45rem 1rem;
+  background: var(--surface-soft);
+  border-radius: var(--radius-full);
+  transition: all 0.2s ease;
+}
+
+.sh-role-card:hover .sh-role-action-prompt {
+  background: var(--medical-blue-light);
+  color: var(--medical-blue-dark);
+}
+
+/* Selected State */
+.sh-role-card-selected {
+  border-color: var(--medical-blue) !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2), 0 20px 30px -10px rgba(2, 132, 199, 0.2) !important;
+  background: #ffffff;
+}
+
+.sh-role-card-selected .sh-role-circle {
+  background: var(--medical-gradient) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: var(--glow-blue) !important;
+  animation: pulseGlow 2.5s infinite ease-in-out;
+}
+
+.sh-role-card-selected .sh-role-badge {
+  background: var(--medical-blue-light);
+  color: var(--medical-blue-dark);
+  border-color: #bae6fd;
+}
+
+.sh-role-card-selected .sh-role-action-prompt {
+  background: var(--medical-blue);
+  color: #ffffff;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .sh-role-grid {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+    margin: 0 auto;
+    gap: 1.5rem;
+  }
+
+  .sh-role-card {
+    padding: 2rem 1.5rem;
+  }
+}

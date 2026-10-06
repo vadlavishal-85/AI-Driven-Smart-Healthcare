@@ -1,0 +1,1025 @@
+/* ==========================================================================
+   SMART HEALTHCARE — PREMIUM LANDING PAGE STYLES
+   Theme: High-Tech Smart Hospital & Clinical Ecosystem
+   ========================================================================== */
+
+.sh-landing-root {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+/* 1. HERO VIEWPORT (100vh FULL SCREEN) */
+.sh-hero-viewport {
+  position: relative;
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  background: #060b14;
+}
+
+.sh-hero-bg-visual {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 1;
+  filter: brightness(0.65) contrast(1.1);
+  transform: scale(1.02);
+  transition: transform 10s ease-out;
+}
+
+.sh-hero-viewport:hover .sh-hero-bg-visual {
+  transform: scale(1.06);
+}
+
+.sh-hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at 50% 30%,
+    rgba(6, 11, 20, 0.4) 0%,
+    rgba(7, 13, 24, 0.85) 75%,
+    rgba(6, 11, 20, 0.98) 100%
+  );
+  backdrop-filter: blur(2px);
+  z-index: 2;
+}
+
+/* Floating Particles & ECG Wave in Hero */
+.sh-hero-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.sh-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--clinical-cyan);
+  opacity: 0.35;
+  filter: blur(1px);
+  animation: floatParticle 8s infinite ease-in-out;
+}
+
+.sh-particle.p1 { width: 6px; height: 6px; top: 25%; left: 15%; animation-delay: 0s; }
+.sh-particle.p2 { width: 10px; height: 10px; top: 60%; left: 80%; animation-delay: 2s; background: var(--hospital-teal); }
+.sh-particle.p3 { width: 4px; height: 4px; top: 75%; left: 25%; animation-delay: 4s; }
+.sh-particle.p4 { width: 8px; height: 8px; top: 35%; left: 70%; animation-delay: 1s; background: var(--medical-blue); }
+.sh-particle.p5 { width: 5px; height: 5px; top: 85%; left: 55%; animation-delay: 3s; }
+
+@keyframes floatParticle {
+  0% { transform: translateY(0) scale(1); opacity: 0.2; }
+  50% { transform: translateY(-30px) scale(1.3); opacity: 0.6; }
+  100% { transform: translateY(0) scale(1); opacity: 0.2; }
+}
+
+.sh-hero-ecg-svg {
+  position: absolute;
+  bottom: 12%;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  opacity: 0.25;
+}
+
+.sh-ecg-pulse-path {
+  fill: none;
+  stroke: var(--clinical-cyan);
+  stroke-width: 2;
+  stroke-dasharray: 200, 1000;
+  animation: ecgPulseAnim 4s linear infinite;
+}
+
+@keyframes ecgPulseAnim {
+  0% { stroke-dashoffset: 1200; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* Landing Nav Header */
+.sh-landing-nav-header {
+  position: relative;
+  z-index: 20;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  background: rgba(7, 13, 24, 0.45);
+}
+
+.sh-landing-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sh-landing-brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.sh-brand-icon-halo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.3) 0%, rgba(6, 182, 212, 0.3) 100%);
+  border: 1px solid rgba(6, 182, 212, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--clinical-cyan);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+}
+
+.sh-brand-icon-halo.small {
+  width: 36px;
+  height: 36px;
+}
+
+.sh-pulse-icon {
+  animation: heartPulse 2s infinite ease-in-out;
+}
+
+@keyframes heartPulse {
+  0% { transform: scale(1); }
+  14% { transform: scale(1.18); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.12); }
+  70% { transform: scale(1); }
+}
+
+.sh-brand-text-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.sh-brand-title-main {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.sh-cyan-text {
+  color: var(--clinical-cyan);
+}
+
+.sh-brand-title-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.sh-landing-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.sh-landing-nav-link {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: var(--transition);
+  position: relative;
+}
+
+.sh-landing-nav-link:hover,
+.sh-landing-nav-link.active {
+  color: #ffffff;
+}
+
+.sh-landing-nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--clinical-cyan);
+  border-radius: 2px;
+  box-shadow: 0 0 8px var(--clinical-cyan);
+}
+
+.sh-enter-btn-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.3);
+  transition: var(--transition);
+}
+
+.sh-enter-btn-top:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(6, 182, 212, 0.5);
+  background: linear-gradient(135deg, #0369a1 0%, #0891b2 100%);
+}
+
+/* Hero Center Content */
+.sh-hero-center-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 3rem 1.5rem 2rem 1.5rem;
+  margin: auto;
+  max-width: 960px;
+}
+
+.sh-hero-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 1.15rem;
+  background: rgba(6, 182, 212, 0.12);
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #cffafe;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.15);
+}
+
+.sh-badge-sep {
+  opacity: 0.4;
+}
+
+.sh-badge-highlight {
+  color: var(--clinical-cyan);
+}
+
+.sh-hero-headline {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+  line-height: 1.1;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.sh-hero-subheadline {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.sh-hero-description {
+  font-size: 1.1rem;
+  line-height: 1.65;
+  color: #94a3b8;
+  max-width: 760px;
+  margin-bottom: 2.25rem;
+}
+
+.sh-hero-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.sh-hero-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2.25rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-full);
+  box-shadow: 0 8px 30px rgba(2, 132, 199, 0.4), 0 0 0 1px rgba(6, 182, 212, 0.3);
+  transition: var(--transition);
+}
+
+.sh-hero-btn-primary:hover {
+  transform: translateY(-3px) scale(1.02);
+  background: linear-gradient(135deg, #0369a1 0%, #0891b2 100%);
+  box-shadow: 0 14px 40px rgba(6, 182, 212, 0.55), 0 0 0 2px rgba(6, 182, 212, 0.6);
+}
+
+.sh-hero-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.95rem 1.85rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(8px);
+  transition: var(--transition);
+}
+
+.sh-hero-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Metrics Strip */
+.sh-hero-metrics-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 1rem 2rem;
+  background: rgba(14, 23, 42, 0.65);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-md);
+  flex-wrap: wrap;
+}
+
+.sh-hero-metric-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sh-metric-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.sh-metric-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.sh-hero-metric-sep {
+  width: 1px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* 2. SHARED SECTION STYLES */
+.sh-section {
+  padding: 6rem 0;
+  position: relative;
+}
+
+.sh-section-header {
+  max-width: 760px;
+  margin: 0 auto 3.5rem auto;
+}
+
+.sh-section-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.95rem;
+  border-radius: var(--radius-full);
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #38bdf8;
+  margin-bottom: 1rem;
+}
+
+.sh-section-title {
+  font-size: 2.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.85rem;
+  letter-spacing: -0.02em;
+}
+
+.sh-section-subtitle {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* 2. ECOSYSTEM PIPELINE */
+.sh-ecosystem-section {
+  background: linear-gradient(180deg, #070d18 0%, #0c1527 100%);
+  border-top: 1px solid var(--border);
+}
+
+.sh-workflow-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  position: relative;
+}
+
+.sh-workflow-step-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.sh-workflow-step-card:hover,
+.sh-workflow-step-card.active {
+  background: var(--surface-elevated);
+  border-color: var(--clinical-cyan);
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.25);
+  transform: translateY(-4px);
+}
+
+.sh-step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sh-step-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sh-step-icon-box.theme-blue { background: rgba(2, 132, 199, 0.2); color: #38bdf8; }
+.sh-step-icon-box.theme-teal { background: rgba(13, 148, 136, 0.2); color: #2dd4bf; }
+.sh-step-icon-box.theme-cyan { background: rgba(6, 182, 212, 0.2); color: #22d3ee; }
+.sh-step-icon-box.theme-emerald { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+
+.sh-step-badge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-xs);
+}
+
+.sh-step-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.35rem;
+}
+
+.sh-step-desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.sh-step-connector-arrow {
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--clinical-cyan);
+  background: var(--surface-card);
+  border-radius: 50%;
+  padding: 2px;
+  z-index: 5;
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .sh-step-connector-arrow {
+    display: block;
+  }
+}
+
+/* 3. CONNECTED HEALTHCARE NETWORK */
+.sh-network-section {
+  background: #091222;
+  border-top: 1px solid var(--border);
+}
+
+.sh-network-visual-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.sh-network-hub-center {
+  padding: 1.5rem 3rem;
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.25) 0%, rgba(6, 182, 212, 0.25) 100%);
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 35px rgba(6, 182, 212, 0.3);
+  text-align: center;
+}
+
+.sh-hub-core {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sh-hub-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.sh-hub-subtitle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--clinical-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sh-network-nodes-ring {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.sh-net-node-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.sh-net-node-card:hover {
+  border-color: var(--clinical-cyan);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-glow-cyan);
+}
+
+.sh-net-node-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--clinical-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sh-net-node-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.2rem;
+}
+
+.sh-net-node-count {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* 4. PLATFORM CAPABILITIES */
+.sh-capabilities-section {
+  background: linear-gradient(180deg, #091222 0%, #070d18 100%);
+  border-top: 1px solid var(--border);
+}
+
+.sh-capabilities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.sh-capability-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+}
+
+.sh-capability-card:hover {
+  background: var(--surface-elevated);
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(6, 182, 212, 0.15);
+  transform: translateY(-4px);
+}
+
+.sh-cap-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.sh-cap-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--clinical-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sh-cap-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--clinical-cyan);
+  background: rgba(6, 182, 212, 0.12);
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+}
+
+.sh-cap-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.65rem;
+}
+
+.sh-cap-desc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* 5. ROLE ENTRY SECTION */
+.sh-roles-section {
+  background: #0a1426;
+  border-top: 1px solid var(--border);
+}
+
+.sh-role-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.sh-role-portal-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-md);
+}
+
+.sh-role-portal-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--clinical-cyan);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 30px rgba(6, 182, 212, 0.3);
+}
+
+.sh-role-photo-wrapper {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+}
+
+.sh-role-card-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.sh-role-portal-card:hover .sh-role-card-photo {
+  transform: scale(1.08);
+}
+
+.sh-role-photo-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(7, 13, 24, 0.1) 0%, rgba(14, 23, 42, 0.95) 100%);
+}
+
+.sh-role-photo-tag {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: rgba(7, 13, 24, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(8px);
+}
+
+.sh-role-card-body {
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.sh-role-title-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sh-role-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--clinical-cyan);
+}
+
+.sh-role-card-name {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.sh-role-card-sub {
+  font-size: 0.8125rem;
+  color: var(--clinical-cyan);
+  font-weight: 600;
+}
+
+.sh-role-card-desc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: 1.25rem;
+}
+
+.sh-role-feature-list {
+  list-style: none;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sh-role-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.8125rem;
+  color: #e2e8f0;
+}
+
+.sh-role-enter-action {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #ffffff;
+  transition: var(--transition);
+}
+
+.sh-role-portal-card:hover .sh-role-enter-action {
+  color: var(--clinical-cyan);
+}
+
+.sh-role-portal-card:hover .sh-role-arrow {
+  transform: translateX(6px);
+  color: var(--clinical-cyan);
+}
+
+.sh-role-arrow {
+  transition: transform 0.25s ease;
+}
+
+/* 6. FINAL CTA */
+.sh-cta-section {
+  padding: 5rem 0;
+  background: #070d18;
+}
+
+.sh-cta-card {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.2) 0%, rgba(6, 182, 212, 0.2) 50%, rgba(13, 148, 136, 0.2) 100%);
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  border-radius: var(--radius-xl);
+  padding: 4rem 2rem;
+  text-align: center;
+  box-shadow: 0 0 50px rgba(6, 182, 212, 0.2);
+  backdrop-filter: blur(12px);
+}
+
+.sh-cta-content {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.sh-cta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.95rem;
+  background: rgba(6, 182, 212, 0.15);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #cffafe;
+  margin-bottom: 1.25rem;
+}
+
+.sh-cta-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.sh-cta-desc {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 2.25rem;
+}
+
+/* 7. PROFESSIONAL FOOTER */
+.sh-landing-footer {
+  background: #050912;
+  border-top: 1px solid var(--border);
+  padding: 4.5rem 0 2rem 0;
+}
+
+.sh-footer-inner {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3.5rem;
+}
+
+.sh-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.sh-footer-desc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  max-width: 380px;
+}
+
+.sh-compliance-badges {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.sh-comp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.65rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.sh-footer-heading {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sh-footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sh-footer-links a,
+.sh-footer-links span {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.sh-footer-links a:hover {
+  color: var(--clinical-cyan);
+}
+
+.sh-footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.sh-footer-bottom-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--text-secondary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .sh-hero-headline {
+    font-size: 2.75rem;
+  }
+  .sh-footer-inner {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .sh-hero-headline {
+    font-size: 2.2rem;
+  }
+  .sh-hero-subheadline {
+    font-size: 1.3rem;
+  }
+  .sh-hero-actions-row {
+    flex-direction: column;
+    width: 100%;
+  }
+  .sh-hero-btn-primary,
+  .sh-hero-btn-ghost {
+    width: 100%;
+    justify-content: center;
+  }
+  .sh-footer-inner {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}

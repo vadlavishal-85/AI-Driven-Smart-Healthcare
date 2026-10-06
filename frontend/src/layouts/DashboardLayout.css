@@ -1,0 +1,24 @@
+/* =====================================================================
+   Dashboard Layout Stylesheet - Top Navigation Centric
+   ===================================================================== */
+
+.sh-dash-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+  padding-top: var(--topbar-height);
+}
+
+.sh-dash-main {
+  flex: 1;
+  padding: 2.25rem 0 4rem;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .sh-dash-main {
+    padding: 1.5rem 0 3rem;
+  }
+}

@@ -1,0 +1,27 @@
+.sh-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.sh-card-pad-none { padding: 0; }
+.sh-card-pad-sm { padding: 1rem; }
+.sh-card-pad-md { padding: 1.5rem; }
+.sh-card-pad-lg { padding: 2rem; }
+
+.sh-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(6, 182, 212, 0.4);
+}
+
+.sh-card-glass {
+  background: rgba(14, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: var(--surface-border);
+}

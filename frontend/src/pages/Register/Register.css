@@ -1,0 +1,173 @@
+/* =====================================================================
+   REGISTER PAGE STYLES — SMART HOSPITAL IDENTITY
+   ===================================================================== */
+
+.sh-register-page {
+  padding-top: var(--topbar-height);
+  min-height: 100vh;
+  background: var(--background);
+  display: flex;
+  flex-direction: column;
+}
+
+.sh-register-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 1.5rem;
+}
+
+.sh-register-wrapper {
+  width: 100%;
+  max-width: 560px;
+}
+
+.sh-register-card {
+  padding: 2.75rem 2.5rem;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-elevated);
+  border: 1px solid var(--border);
+  background: var(--surface-card);
+}
+
+.sh-register-role-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.sh-register-role-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(2, 132, 199, 0.2);
+  border: 2px solid rgba(56, 189, 248, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 20px rgba(2, 132, 199, 0.3);
+}
+
+.sh-register-role-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.sh-register-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.35rem;
+}
+
+.sh-security-badge {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.sh-register-role-info h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.sh-register-role-info p {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Password Strength Meter */
+.password-strength-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: -0.5rem;
+}
+
+.strength-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.strength-label {
+  font-weight: 700;
+}
+
+.strength-muted { color: var(--text-muted); }
+.strength-danger { color: var(--danger); }
+.strength-warning { color: var(--warning); }
+.strength-info { color: var(--clinical-cyan); }
+.strength-success { color: var(--success); }
+
+.strength-bars {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+}
+
+.strength-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  transition: background 0.3s ease;
+}
+
+.bar-danger { background: var(--danger); }
+.bar-warning { background: var(--warning); }
+.bar-info { background: var(--clinical-cyan); }
+.bar-success { background: var(--success); }
+
+.register-consent-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.consent-text {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.consent-text a {
+  color: var(--clinical-cyan);
+  font-weight: 600;
+}
+
+.auth-footer-prompt {
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin-top: 1rem;
+}
+
+.auth-accent-link {
+  color: var(--clinical-cyan);
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .form-row-2 {
+    grid-template-columns: 1fr;
+  }
+}
