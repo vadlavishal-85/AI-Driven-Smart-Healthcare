@@ -38,6 +38,7 @@ class User(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     role = relationship("Role", lazy="joined")
+    doctor_profile = relationship("DoctorProfile", back_populates="user", uselist=False, lazy="joined")
 
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}')>"

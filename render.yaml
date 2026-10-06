@@ -25,6 +25,10 @@ services:
         generateValue: true
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: "30"
+      - key: BOOTSTRAP_ADMIN_EMAIL
+        value: admin@smarthealthcare.local
+      - key: BOOTSTRAP_ADMIN_PASSWORD
+        generateValue: true
       - key: CORS_ORIGINS
         value: https://smarthealthcare-frontend.onrender.com
       - key: DATABASE_URL

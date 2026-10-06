@@ -1,9 +1,10 @@
 import { getToken } from './tokenService';
 
-// Empty means same-origin, which is the production default when the static
-// frontend and API are routed behind one hostname. Local dev can set the API
-// origin in frontend/.env; a separate hosted API is supplied at build time.
-export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+// Production deployment supplies the API origin. Local Vite development uses
+// the backend's default port unless an explicit API origin is configured.
+const configuredApiOrigin = import.meta.env.VITE_API_BASE_URL
+  || (import.meta.env.DEV ? 'http://localhost:8000' : '');
+export const API_BASE_URL = configuredApiOrigin.replace(/\/+$/, '');
 
 /**
  * Centralized API client utilizing native fetch.

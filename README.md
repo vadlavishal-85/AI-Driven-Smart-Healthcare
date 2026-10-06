@@ -10,7 +10,7 @@ A professional, real-world healthcare web application designed for managing and 
 - **Frontend**: React (Vite) - JavaScript
 - **Backend**: FastAPI - Python
 - **Databases**:
-  - Relational Database: PostgreSQL on Render, or MySQL for an existing/local setup
+  - Relational Database: PostgreSQL on Render, SQLite for local development, or MySQL when explicitly configured
   - MongoDB: optional; no current healthcare API depends on it
 
 ---
@@ -18,9 +18,10 @@ A professional, real-world healthcare web application designed for managing and 
 ## Current Implementation Scope
 
 - The React frontend contains the landing, role selection, login, registration, dashboard shell, profile, and healthcare module screens.
-- The FastAPI backend currently implements authentication, registration, role checks, and user profile/password APIs.
-- Healthcare module screens still contain demo/static content. Patient, doctor, appointment, records, notes, prescription, exchange, and analytics APIs are not implemented yet, so those workflows are not production data features.
-- Authentication requires a reachable relational database. Render uses PostgreSQL through `DATABASE_URL`; MySQL remains supported for local/existing setups. MongoDB is optional because current routes do not use it.
+- The FastAPI backend implements patient registration, login, role checks, profile/password APIs, doctor provisioning by administrators, and database-backed appointments.
+- Patients can book with active doctors, view only their appointments, cancel eligible bookings, and read clinical information attached to their visits. Assigned doctors can confirm/close visits and record diagnosis, treatment plan, and clinical notes.
+- Patient/doctor dashboards, medical-record search, SOAP notes, prescriptions, data exchange, and analytics still use sample content. These screens are not production clinical workflows.
+- Render uses PostgreSQL through `DATABASE_URL`. Local development automatically creates a persistent SQLite database; set `APP_DATABASE_BACKEND=mysql` to use the legacy local MySQL configuration. MongoDB is optional because current API routes do not use it.
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for the Render deployment setup and current prerequisites.
 
@@ -99,7 +100,7 @@ SmartHealthcare/
    ```bash
    uvicorn app.main:app --reload
    ```
-5. Access the API at `http://127.0.0.1:8000` (Interactive Swagger docs at `http://127.0.0.1:8000/docs`).
+5. Access the API at `http://127.0.0.1:8000` (interactive Swagger docs at `http://127.0.0.1:8000/docs`). The local API creates the SQLite schema and development demo accounts automatically.
 
 ---
 

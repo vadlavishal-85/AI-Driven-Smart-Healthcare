@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from sqlalchemy.exc import SQLAlchemyError
 from app.auth.router import router as auth_router
 from app.users.router import router as users_router
+from app.appointments.router import router as appointments_router
+from app.admin.router import router as admin_router
 from app.database.mongodb import check_mongodb_connection
 from app.database.mysql import (
     Base,
@@ -16,6 +18,7 @@ from app.database.mysql import (
     engine,
 )
 from app.models.auth import Role, RoleEnum, User
+from app.models.appointments import DoctorProfile
 from app.auth.security import hash_password
 
 logger = logging.getLogger(__name__)
@@ -71,6 +74,8 @@ async def handle_unconfigured_database(_request, _exception):
 # Include Authentication & Users Routers
 app.include_router(auth_router)
 app.include_router(users_router)
+app.include_router(appointments_router)
+app.include_router(admin_router)
 
 
 @app.on_event("startup")
@@ -109,6 +114,29 @@ def initialize_relational_database():
                             password_hash=hash_password(password),
                             is_active=True,
                         ))
+                db.commit()
+
+                demo_doctor = db.query(User).filter(User.email == "doctor.demo@smarthealthcare.local").first()
+                if demo_doctor and not demo_doctor.doctor_profile:
+                    db.add(DoctorProfile(
+                        user_id=demo_doctor.id,
+                        department="Primary Care",
+                        specialty="General Practice",
+                    ))
+                    db.commit()
+
+            bootstrap_email = os.getenv("BOOTSTRAP_ADMIN_EMAIL", "").strip().lower()
+            bootstrap_password = os.getenv("BOOTSTRAP_ADMIN_PASSWORD", "").strip()
+            if bootstrap_email and bootstrap_password and not db.query(User).filter(User.email == bootstrap_email).first():
+                admin_role = db.query(Role).filter(Role.name == RoleEnum.ADMIN.value).one()
+                db.add(User(
+                    role_id=admin_role.id,
+                    first_name="System",
+                    last_name="Administrator",
+                    email=bootstrap_email,
+                    password_hash=hash_password(bootstrap_password),
+                    is_active=True,
+                ))
                 db.commit()
     except SQLAlchemyError as exc:
         # Keep liveness available so Render can show logs; readiness remains 503.

@@ -2,6 +2,7 @@
 
 import os
 import urllib.parse
+from pathlib import Path
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
@@ -43,7 +44,15 @@ def _normalize_database_url(url: str) -> str:
 def _configured_database_url() -> str | None:
     if DATABASE_URL:
         return _normalize_database_url(DATABASE_URL)
-    if MYSQL_USER:
+    app_env = os.getenv("APP_ENV", "development").strip().lower()
+    database_backend = os.getenv("APP_DATABASE_BACKEND", "sqlite").strip().lower()
+    if database_backend == "mysql" and MYSQL_USER:
+        return get_mysql_url()
+    if app_env not in {"prod", "production"} and database_backend == "sqlite":
+        # Give a fresh local checkout a persistent database without extra setup.
+        local_database = Path(__file__).resolve().parents[2] / "smarthealthcare.sqlite3"
+        return f"sqlite:///{local_database.as_posix()}"
+    if app_env in {"prod", "production"} and MYSQL_USER:
         return get_mysql_url()
     return None
 
