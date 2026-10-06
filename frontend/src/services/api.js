@@ -92,9 +92,9 @@ export async function apiFetch(endpoint, options = {}) {
       if (message.toLowerCase().includes('already registered') || message.toLowerCase().includes('conflict')) {
         message = 'An account with this email already exists.';
       }
-    } else if (response.status === 503 && !data?.detail && !data?.message) {
-      message = 'A required healthcare data service is unavailable. Please try again later.';
-    } else if (response.status >= 500 && response.status !== 503) {
+    } else if (response.status === 503) {
+      message = 'Healthcare database is unavailable. Please try again later.';
+    } else if (response.status >= 500) {
       message = 'Healthcare server error. Please try again later.';
     }
 
