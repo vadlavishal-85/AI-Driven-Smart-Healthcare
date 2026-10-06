@@ -342,7 +342,7 @@ export default function ModuleView() {
       case '/medical-records':
         return renderMedicalRecordsView();
       case '/clinical-notes':
-        return renderAppointmentsView();
+        return renderClinicalNotesView();
       case '/prescriptions':
         return renderPrescriptionsView();
       case '/data-exchange':
@@ -818,6 +818,75 @@ export default function ModuleView() {
             </div>
           </div>
         )}
+      </div>
+    );
+  };
+
+  // --------------------------------------------------------------------------
+  // CLINICAL NOTES: saved notes linked to real appointments
+  // --------------------------------------------------------------------------
+  const renderClinicalNotesView = () => {
+    const notes = appointments.filter((appointment) => (
+      appointment.diagnosis || appointment.treatment_plan || appointment.clinical_notes
+    ));
+    const formatDate = (value) => new Date(`${value}T00:00:00`).toLocaleDateString('en-US', {
+      month: 'short', day: '2-digit', year: 'numeric',
+    });
+    const labelStatus = (status) => status.toLowerCase().replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+    return (
+      <div className="module-subsystem-wrapper animate-fade-up">
+        <div className="module-header-card">
+          <div className="module-header-info">
+            <div className="module-badge-row">
+              <Badge variant="cyan" size="sm" dot>Appointment-linked notes</Badge>
+              <span className="module-entity-count">{notes.length} Saved Notes</span>
+            </div>
+            <h1 className="module-title">Clinical Notes</h1>
+            <p className="module-subtitle">
+              {isDoctor
+                ? 'Review notes saved for appointments assigned to your account.'
+                : isPatient
+                  ? 'View clinical information your doctor saved for your appointments.'
+                  : 'Review clinical information saved for appointments in the system.'}
+            </p>
+          </div>
+        </div>
+
+        {appointmentError && <p className="module-subtitle" role="alert">{appointmentError}</p>}
+
+        <div className="appointments-list-container" aria-live="polite">
+          {appointmentsLoading && <Card>Loading clinical notes…</Card>}
+          {!appointmentsLoading && !appointmentError && notes.length === 0 && (
+            <Card>No clinical notes have been saved for your appointments yet.</Card>
+          )}
+          {!appointmentsLoading && notes.map((appointment) => (
+            <Card key={appointment.id} className="appointment-card-item">
+              <div className="apt-date-col">
+                <span className="apt-date-text">{formatDate(appointment.appointment_date)}</span>
+                <span className="apt-id-tag">Appointment #{appointment.id}</span>
+              </div>
+              <div className="apt-info-col">
+                <div className="apt-title-row">
+                  <h4>{appointment.reason}</h4>
+                  <Badge
+                    variant={appointment.status === 'CONFIRMED' ? 'success' : appointment.status === 'COMPLETED' ? 'neutral' : appointment.status === 'CANCELLED' || appointment.status === 'NO_SHOW' ? 'warning' : 'primary'}
+                    size="sm"
+                  >
+                    {labelStatus(appointment.status)}
+                  </Badge>
+                </div>
+                <div className="apt-meta-chips">
+                  {isDoctor && <span className="apt-meta-chip"><User size={13} className="text-primary" /> Patient: <strong>{appointment.patient_name}</strong></span>}
+                  {!isDoctor && <span className="apt-meta-chip"><Stethoscope size={13} className="text-teal" /> Doctor: <strong>{appointment.doctor_name}</strong></span>}
+                </div>
+                {appointment.diagnosis && <p className="module-subtitle"><strong>Diagnosis:</strong> {appointment.diagnosis}</p>}
+                {appointment.treatment_plan && <p className="module-subtitle"><strong>Treatment plan:</strong> {appointment.treatment_plan}</p>}
+                {appointment.clinical_notes && <p className="module-subtitle"><strong>Clinical notes:</strong> {appointment.clinical_notes}</p>}
+              </div>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   };

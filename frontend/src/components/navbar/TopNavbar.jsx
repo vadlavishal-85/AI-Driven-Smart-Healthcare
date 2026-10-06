@@ -274,6 +274,31 @@ export default function TopNavbar() {
             </div>
           )}
 
+          {isAuthenticated && (
+            <div className="sh-topbar-mobile-account mobile-only" aria-label="Account actions">
+              <Link
+                to="/profile"
+                className="sh-topbar-mobile-action"
+                aria-label="Account Profile"
+                title="Account Profile"
+                onClick={() => setMobileOpen(false)}
+              >
+                <User size={16} />
+                <span>Profile</span>
+              </Link>
+              <button
+                type="button"
+                className="sh-topbar-mobile-action"
+                aria-label="Sign Out"
+                title="Sign Out"
+                onClick={handleLogout}
+              >
+                <LogOut size={16} />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          )}
+
           {/* Mobile Toggle */}
           <button
             type="button"

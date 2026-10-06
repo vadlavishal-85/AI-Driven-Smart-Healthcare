@@ -189,6 +189,35 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+.sh-topbar-mobile-account {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sh-topbar-mobile-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 36px;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: var(--transition-fast);
+}
+
+.sh-topbar-mobile-action:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
 .sh-notif-dot {
   position: absolute;
   top: 8px;
@@ -387,6 +416,17 @@
   align-items: center;
   justify-content: center;
   padding: 0.4rem;
+}
+
+@media (max-width: 420px) {
+  .sh-topbar-mobile-action {
+    width: 36px;
+    padding: 0;
+  }
+
+  .sh-topbar-mobile-action span {
+    display: none;
+  }
 }
 
 .sh-mobile-drawer {
