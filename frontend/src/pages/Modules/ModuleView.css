@@ -810,8 +810,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--border-light);
   font-size: 0.75rem;
@@ -912,23 +910,7 @@
 .exchange-time-actions {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 1rem;
-}
-
-.share-consent-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.65rem;
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  line-height: 1.45;
-}
-
-.share-consent-row input {
-  flex: 0 0 auto;
-  margin-top: 0.15rem;
-  accent-color: var(--clinical-cyan);
 }
 
 .tx-time {

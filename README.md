@@ -11,7 +11,7 @@ A professional, real-world healthcare web application designed for managing and 
 - **Backend**: FastAPI - Python
 - **Databases**:
   - Relational Database: PostgreSQL on Render, SQLite for local development, or MySQL when explicitly configured
-  - MongoDB: clinical visit records, prescriptions, private prescription notes, and consent-logged FHIR share packages
+  - MongoDB: optional; no current healthcare API depends on it
 
 ---
 
@@ -19,10 +19,9 @@ A professional, real-world healthcare web application designed for managing and 
 
 - The React frontend contains the landing, role selection, login, registration, dashboard shell, profile, and healthcare module screens.
 - The FastAPI backend implements patient registration, login, role checks, profile/password APIs, doctor provisioning by administrators, and database-backed appointments.
-- Patients can book with active doctors, view only their appointments, cancel eligible bookings, and read clinical information attached to their visits. Assigned doctors can confirm/close visits and record diagnosis, treatment plan, and clinical notes in MongoDB.
-- Doctors can create prescriptions for their confirmed or completed visits. The patient and administrators can read those prescriptions; clinician-only notes remain private to their author.
-- Patients, the prescribing doctor, and administrators can prepare consent-logged FHIR R4 exports for another hospital. Packages are saved in MongoDB and downloaded; direct hospital delivery still requires a configured receiving endpoint.
-- Render uses PostgreSQL through `DATABASE_URL` for accounts and appointments. Set `MONGODB_URI` and `MONGODB_DATABASE` on the API service for clinical, prescription, and exchange features. Local development uses the configured URI too; clinical data endpoints return a clear service-unavailable error if MongoDB is not configured.
+- Patients can book with active doctors, view only their appointments, cancel eligible bookings, and read clinical information attached to their visits. Assigned doctors can confirm/close visits and record diagnosis, treatment plan, and clinical notes.
+- Patient/doctor dashboards, medical-record search, SOAP notes, prescriptions, data exchange, and analytics still use sample content. These screens are not production clinical workflows.
+- Render uses PostgreSQL through `DATABASE_URL`. Local development automatically creates a persistent SQLite database; set `APP_DATABASE_BACKEND=mysql` to use the legacy local MySQL configuration. MongoDB is optional because current API routes do not use it.
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for the Render deployment setup and current prerequisites.
 See [docs/BACKEND_OVERVIEW.md](docs/BACKEND_OVERVIEW.md) for the live backend architecture, database tables, API map, and faculty demonstration steps.

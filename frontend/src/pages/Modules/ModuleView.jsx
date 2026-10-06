@@ -5,6 +5,7 @@ import {
   Users,
   Stethoscope,
   Calendar,
+  FileText,
   ArrowLeftRight,
   ShieldCheck,
   ArrowRight,
@@ -48,6 +49,142 @@ function toCsvCell(value) {
 // ============================================================================
 // Sample content used only by the preview-only modules below.
 // ============================================================================
+
+const RECORDS_DATA = [
+  {
+    id: 'EMR-2026-0941',
+    date: 'Oct 02, 2026',
+    patient: 'John Doe',
+    patientId: 'PAT-8801',
+    doctor: 'Dr. Robert Chen, MD',
+    diagnosis: 'Stage 2 Essential Hypertension (ICD-10: I10)',
+    symptoms: 'Occasional morning occipital headache, mild exertional fatigue.',
+    observations: 'BP: 142/88 mmHg right arm sitting. Resting HR 74 bpm. S1/S2 normal without murmur.',
+    treatment: 'Titrate Amlodipine to 10mg daily. Restrict dietary sodium < 2g/day. Follow-up 4 weeks.',
+    reports: ['12-Lead-ECG-Tracing.pdf', 'Renal-Function-Panel.pdf'],
+  },
+  {
+    id: 'EMR-2026-0942',
+    date: 'Oct 04, 2026',
+    patient: 'Emily Davis',
+    patientId: 'PAT-8802',
+    doctor: 'Dr. Sarah Patel, MD',
+    diagnosis: 'Intractable Migraine without Aura (ICD-10: G43.0)',
+    symptoms: 'Throbbing unilateral hemicranial headache, photophobia, nausea.',
+    observations: 'Cranial nerves II-XII grossly intact. Fundoscopic exam reveals sharp disc margins.',
+    treatment: 'Prescribe Sumatriptan 50mg PRN at onset. Initiate Topiramate 25mg nightly prophylaxis.',
+    reports: ['Brain-MRI-T2-Axial.dcm', 'Neurological-Exam-Summary.pdf'],
+  },
+  {
+    id: 'EMR-2026-0943',
+    date: 'Sep 28, 2026',
+    patient: 'Michael Scott',
+    patientId: 'PAT-8803',
+    doctor: 'Dr. Robert Chen, MD',
+    diagnosis: 'Type 2 Diabetes Mellitus with Mild Polyneuropathy (ICD-10: E11.40)',
+    symptoms: 'Bilateral tingling in lower extremities, polydipsia, fatigue.',
+    observations: 'HbA1c: 7.8%. Monofilament sensory testing reveals decreased vibration in great toes.',
+    treatment: 'Continue Metformin 500mg BID. Prescribe Pregabalin 75mg QHS. Nutrition consult.',
+    reports: ['Comprehensive-Metabolic-Panel.pdf', 'HbA1c-Glycemic-Report.pdf'],
+  },
+];
+
+const PRESCRIPTIONS_DATA = [
+  {
+    id: 'RX-94821-NY',
+    date: 'Oct 02, 2026',
+    patient: 'John Doe (Age: 45)',
+    doctor: 'Dr. Robert Chen, MD',
+    medication: 'Amlodipine Besylate Oral Tablet',
+    strength: '10 mg',
+    dosage: 'Take 1 tablet orally once daily in the morning after food',
+    quantity: '30 Tablets (30 Days Supply)',
+    refills: '2 Refills Authorized',
+    pharmacy: 'Metro General Hospital Outpatient Pharmacy • Ready for Dispensation',
+    status: 'Active',
+  },
+  {
+    id: 'RX-94822-NY',
+    date: 'Oct 04, 2026',
+    patient: 'Emily Davis (Age: 34)',
+    doctor: 'Dr. Sarah Patel, MD',
+    medication: 'Sumatriptan Succinate Oral Tablet',
+    strength: '50 mg',
+    dosage: 'Take 1 tablet orally at onset of acute migraine; repeat in 2 hours if needed (Max 200mg/24h)',
+    quantity: '9 Tablets',
+    refills: '1 Refill Authorized',
+    pharmacy: 'St. Jude Community Pharmacy • Dispensed',
+    status: 'Active',
+  },
+  {
+    id: 'RX-94823-NY',
+    date: 'Sep 28, 2026',
+    patient: 'Michael Scott (Age: 52)',
+    doctor: 'Dr. Robert Chen, MD',
+    medication: 'Metformin HCl Extended Release Tablet',
+    strength: '500 mg',
+    dosage: 'Take 1 tablet orally twice daily with morning and evening meals',
+    quantity: '60 Tablets (30 Days Supply)',
+    refills: '3 Refills Authorized',
+    pharmacy: 'Central Care Express Pharmacy • Dispensed',
+    status: 'Active',
+  },
+];
+
+const DATA_EXCHANGE_DATA = [
+  {
+    txId: 'TX-FHIR-77291',
+    timestamp: '2026-10-06 05:22:18 UTC',
+    protocol: 'FHIR R4 (DiagnosticReport)',
+    source: 'SmartHealthcare Core EMR Node',
+    destination: 'Regional Health Information Exchange (HIE)',
+    status: 'Completed',
+    hash: 'SHA256: 8f3c4e912a...77b1',
+    remarks: 'Interoperable FHIR bundle serialized and cryptographically acknowledged.',
+    payloadSample: {
+      resourceType: 'DiagnosticReport',
+      id: 'dr-8801-ecg',
+      status: 'final',
+      category: [{ coding: [{ system: 'http://loinc.org', code: '11524-6', display: 'EKG Study' }] }],
+      subject: { reference: 'Patient/PAT-8801', display: 'John Doe' },
+      effectiveDateTime: '2026-10-02T10:30:00Z',
+    },
+  },
+  {
+    txId: 'TX-HL7-88402',
+    timestamp: '2026-10-06 04:51:03 UTC',
+    protocol: 'HL7 v2.5.1 (ADT_A01)',
+    source: 'Hospital Admission Subsystem',
+    destination: 'State Health Department Surveillance',
+    status: 'Completed',
+    hash: 'SHA256: 4a9d1c778e...33f9',
+    remarks: 'Admission, Discharge & Transfer event broadcast validated.',
+    payloadSample: {
+      messageType: 'ADT^A01^ADT_A01',
+      sendingApplication: 'SmartHealthcare-ADT',
+      receivingApplication: 'State-Health-Surveillance',
+      patientIdentifier: 'PAT-8804',
+      eventReason: 'Acute Respiratory Intake',
+    },
+  },
+  {
+    txId: 'TX-CCDA-99103',
+    timestamp: '2026-10-06 03:15:45 UTC',
+    protocol: 'C-CDA R2.1 (Continuity of Care)',
+    source: 'Outpatient Cardiology Center',
+    destination: 'National Veteran Care Gateway',
+    status: 'Pending',
+    hash: 'SHA256: e921bc448a...12aa',
+    remarks: 'TLS 1.3 encrypted payload in transit with mutual TLS certificate.',
+    payloadSample: {
+      documentType: 'ClinicalDocument',
+      code: '34133-9',
+      displayName: 'Summarization of Episode Note',
+      confidentialityCode: 'N',
+    },
+  },
+];
+
 const AUDIT_EVENTS_DATA = [
   {
     id: 'EVT-1009',
@@ -95,17 +232,6 @@ export default function ModuleView() {
   const [selectedTx, setSelectedTx] = useState(null);
   const [newModalOpen, setNewModalOpen] = useState(false);
   const [appointments, setAppointments] = useState([]);
-  const [prescriptions, setPrescriptions] = useState([]);
-  const [prescriptionCreateOpen, setPrescriptionCreateOpen] = useState(false);
-  const [prescriptionCreateSaving, setPrescriptionCreateSaving] = useState(false);
-  const [prescriptionCreateError, setPrescriptionCreateError] = useState('');
-  const [selectedPrescriptionToShare, setSelectedPrescriptionToShare] = useState(null);
-  const [preparedFHIRShare, setPreparedFHIRShare] = useState(null);
-  const [hospitalShareSaving, setHospitalShareSaving] = useState(false);
-  const [dataExchangeEvents, setDataExchangeEvents] = useState([]);
-  const [dataExchangeLoading, setDataExchangeLoading] = useState(false);
-  const [dataExchangeError, setDataExchangeError] = useState('');
-  const [dataExchangeSuccess, setDataExchangeSuccess] = useState('');
   const [doctors, setDoctors] = useState([]);
   const [patients, setPatients] = useState([]);
   const [patientsLoading, setPatientsLoading] = useState(false);
@@ -119,8 +245,6 @@ export default function ModuleView() {
   const [prescriptionNotes, setPrescriptionNotes] = useState({});
   const [prescriptionDrafts, setPrescriptionDrafts] = useState({});
   const [prescriptionLoading, setPrescriptionLoading] = useState(false);
-  const [prescriptionNotesLoading, setPrescriptionNotesLoading] = useState(false);
-  const [prescriptionNotesError, setPrescriptionNotesError] = useState('');
   const [prescriptionSaving, setPrescriptionSaving] = useState(false);
   const [prescriptionError, setPrescriptionError] = useState('');
   const [prescriptionSuccess, setPrescriptionSuccess] = useState('');
@@ -182,66 +306,37 @@ export default function ModuleView() {
     }
   }, []);
 
-  const loadPrescriptions = useCallback(async () => {
+  const loadPrescriptionNotes = useCallback(async () => {
     setPrescriptionLoading(true);
     setPrescriptionError('');
-    try {
-      setPrescriptions(await apiFetch('/prescriptions'));
-    } catch (error) {
-      setPrescriptionError(error.message || 'Unable to load prescriptions from the clinical data store.');
-    } finally {
-      setPrescriptionLoading(false);
-    }
-  }, []);
-
-  const loadDataExchangeEvents = useCallback(async () => {
-    setDataExchangeLoading(true);
-    setDataExchangeError('');
-    try {
-      setDataExchangeEvents(await apiFetch('/data-exchange'));
-    } catch (error) {
-      setDataExchangeError(error.message || 'Unable to load data exchange history.');
-    } finally {
-      setDataExchangeLoading(false);
-    }
-  }, []);
-
-  const loadPrescriptionNotes = useCallback(async () => {
-    setPrescriptionNotesLoading(true);
-    setPrescriptionNotesError('');
     try {
       const savedNotes = await apiFetch('/prescription-notes');
       const notesByCode = Object.fromEntries(savedNotes.map(({ prescription_code: code, note }) => [code, note]));
       setPrescriptionNotes(notesByCode);
       setPrescriptionDrafts(notesByCode);
     } catch (error) {
-      setPrescriptionNotesError(error.message || 'Unable to load prescription notes.');
+      setPrescriptionError(error.message || 'Unable to load prescription notes.');
     } finally {
-      setPrescriptionNotesLoading(false);
+      setPrescriptionLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (['/appointments', '/doctors', '/medical-records', '/clinical-notes'].includes(location.pathname)
-      || (location.pathname === '/prescriptions' && isDoctor)) {
+    if (['/appointments', '/doctors', '/clinical-notes'].includes(location.pathname)) {
       void Promise.resolve().then(loadAppointments);
     }
     if (location.pathname === '/patients') {
       void Promise.resolve().then(loadPatients);
       if (isAdmin) void Promise.resolve().then(loadAdminDoctors);
     }
-    if (location.pathname === '/prescriptions') {
-      void Promise.resolve().then(loadPrescriptions);
-      if (!isPatient) void Promise.resolve().then(loadPrescriptionNotes);
-    }
-    if (location.pathname === '/data-exchange') {
-      void Promise.resolve().then(loadDataExchangeEvents);
+    if (location.pathname === '/prescriptions' && !isPatient) {
+      void Promise.resolve().then(loadPrescriptionNotes);
     }
     if (location.pathname === '/appointments' && requestedDoctorId && isPatient) {
       const timer = window.setTimeout(() => setNewModalOpen(true), 0);
       return () => window.clearTimeout(timer);
     }
-  }, [location.pathname, location.search, requestedDoctorId, isPatient, isDoctor, isAdmin, loadAppointments, loadPatients, loadAdminDoctors, loadPrescriptionNotes, loadPrescriptions, loadDataExchangeEvents]);
+  }, [location.pathname, location.search, requestedDoctorId, isPatient, isAdmin, loadAppointments, loadPatients, loadAdminDoctors, loadPrescriptionNotes]);
 
   const deactivatePatient = async (patient) => {
     const patientName = `${patient.first_name} ${patient.last_name}`.trim();
@@ -336,82 +431,6 @@ export default function ModuleView() {
     }
   };
 
-  const createPrescription = async (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    setPrescriptionCreateError('');
-    setPrescriptionError('');
-    setPrescriptionSuccess('');
-    setPrescriptionCreateSaving(true);
-    try {
-      const created = await apiFetch('/prescriptions', {
-        method: 'POST',
-        body: JSON.stringify({
-          appointment_id: Number(formData.get('appointment_id')),
-          medication: String(formData.get('medication')).trim(),
-          strength: String(formData.get('strength')).trim(),
-          dosage: String(formData.get('dosage')).trim(),
-          quantity: String(formData.get('quantity')).trim(),
-          refills: Number(formData.get('refills')),
-          pharmacy: String(formData.get('pharmacy') || '').trim() || undefined,
-          clinical_note: String(formData.get('clinical_note') || '').trim() || undefined,
-        }),
-      });
-      setPrescriptionCreateOpen(false);
-      setPrescriptionSuccess(`Prescription ${created.prescription_id} was saved and is now visible in the patient's portal and to administrators.`);
-      await loadPrescriptions();
-    } catch (error) {
-      setPrescriptionCreateError(error.message || 'Unable to save this prescription.');
-    } finally {
-      setPrescriptionCreateSaving(false);
-    }
-  };
-
-  const prepareHospitalShare = async (event) => {
-    event.preventDefault();
-    if (!selectedPrescriptionToShare) return;
-    const formData = new FormData(event.currentTarget);
-    setDataExchangeError('');
-    setDataExchangeSuccess('');
-    setHospitalShareSaving(true);
-    try {
-      const share = await apiFetch('/data-exchange/hospital-shares', {
-        method: 'POST',
-        body: JSON.stringify({
-          prescription_id: selectedPrescriptionToShare.prescription_id,
-          destination_hospital: String(formData.get('destination_hospital')).trim(),
-          patient_consent: formData.get('patient_consent') === 'on',
-          include_visit_notes: formData.get('include_visit_notes') === 'on',
-        }),
-      });
-      setPreparedFHIRShare(share);
-      setDataExchangeSuccess(`FHIR share package prepared for ${share.destination_hospital}. Download the package to send it through an approved hospital channel; this app has not transmitted it.`);
-    } catch (error) {
-      setDataExchangeError(error.message || 'Unable to prepare this hospital share.');
-    } finally {
-      setHospitalShareSaving(false);
-    }
-  };
-
-  const inspectExchangePayload = async (eventRecord) => {
-    setDataExchangeError('');
-    try {
-      const share = await apiFetch(`/data-exchange/${eventRecord.share_id}`);
-      setSelectedTx({
-        txId: eventRecord.share_id,
-        protocol: eventRecord.protocol,
-        source: eventRecord.doctor_name,
-        destination: eventRecord.destination_hospital,
-        status: eventRecord.status,
-        hash: `SHA256: ${eventRecord.payload_digest}`,
-        remarks: `Patient consent was confirmed by account #${share.consent_confirmed_by}. This package is ready for export; it was not transmitted to an external hospital.`,
-        payloadSample: share.payload,
-      });
-    } catch (error) {
-      setDataExchangeError(error.message || 'Unable to open the FHIR package.');
-    }
-  };
-
   const pathname = location.pathname;
 
   const renderPatientModuleNotice = (title, message, actionLabel = 'View Clinical Notes', actionPath = '/clinical-notes') => (
@@ -446,13 +465,19 @@ export default function ModuleView() {
       case '/appointments':
         return renderAppointmentsView();
       case '/medical-records':
-        return renderMedicalRecordsView();
+        return isPatient
+          ? renderPatientModuleNotice('Medical Records', 'No patient-specific medical records are connected to this demo account yet.')
+          : renderMedicalRecordsView();
       case '/clinical-notes':
         return renderClinicalNotesView();
       case '/prescriptions':
-        return renderPrescriptionsView();
+        return isPatient
+          ? renderPatientModuleNotice('Prescriptions', 'No patient-specific prescriptions are connected to this demo account yet.', 'Open Appointments', '/appointments')
+          : renderPrescriptionsView();
       case '/data-exchange':
-        return renderDataExchangeView();
+        return isPatient
+          ? renderPatientModuleNotice('Data Exchange', 'Patient data-exchange events are not connected to this demo account yet.', 'Open Appointments', '/appointments')
+          : renderDataExchangeView();
       case '/analytics':
         return isPatient
           ? renderPatientModuleNotice('Analytics', 'System analytics are not available to patient accounts.', 'Return to Dashboard', '/dashboard')
@@ -1263,76 +1288,98 @@ export default function ModuleView() {
   // 4. MEDICAL RECORDS (EMR)
   // --------------------------------------------------------------------------
   const renderMedicalRecordsView = () => {
-    const records = appointments.filter((appointment) => (
-      appointment.diagnosis || appointment.treatment_plan || appointment.clinical_notes
-    ));
-    const formatDate = (value) => new Date(`${value}T00:00:00`).toLocaleDateString('en-US', {
-      month: 'short', day: '2-digit', year: 'numeric',
-    });
-
     return (
       <div className="module-subsystem-wrapper animate-fade-up">
         <div className="module-header-card">
           <div className="module-header-info">
             <div className="module-badge-row">
-              <Badge variant="teal" size="sm" dot>Appointment Clinical Records</Badge>
-              <span className="module-entity-count">{records.length} Saved Records</span>
+              <Badge variant="teal" size="sm" dot>
+                MongoDB Document Collection
+              </Badge>
+              <span className="module-entity-count">{RECORDS_DATA.length} Verified Records</span>
             </div>
             <h1 className="module-title">Electronic Medical Records (EMR)</h1>
             <p className="module-subtitle">
-              Clinical information saved by the assigned doctor is stored with the visit and shown to its patient, care team, and administrators.
+              Diagnostic clinical documents, ICD-10 indexed pathologies, lab observations, and physician treatment plans.
             </p>
           </div>
         </div>
 
-        {appointmentsLoading && <Card>Loading medical records…</Card>}
-        {appointmentError && <p className="module-subtitle" role="alert">{appointmentError}</p>}
-        {!appointmentsLoading && !appointmentError && records.length === 0 && (
-          <Card>No clinical records have been saved for your appointments yet.</Card>
-        )}
         <div className="emr-records-stream">
-          {!appointmentsLoading && records.map((record) => (
-            <Card key={record.id} className="emr-record-card" hoverable>
+          {RECORDS_DATA.map((rec) => (
+            <Card key={rec.id} className="emr-record-card" hoverable>
               <div className="emr-record-top">
                 <div className="emr-id-badge">
-                  <strong>Appointment #{record.id}</strong>
-                  <span className="emr-date-tag">• {formatDate(record.appointment_date)}</span>
+                  <FileText size={18} className="text-teal" />
+                  <strong>{rec.id}</strong>
+                  <span className="emr-date-tag">• {rec.date}</span>
                 </div>
                 <div className="emr-sig-badge">
                   <ShieldCheck size={15} className="text-success" />
-                  <span>Assigned care team</span>
+                  <span>Physician Signed & Sealed</span>
                 </div>
               </div>
 
               <div className="emr-patient-row">
                 <div className="emr-patient-info">
                   <span className="emr-lbl">Patient:</span>
-                  <span className="emr-patient-name">{record.patient_name}</span>
+                  <span className="emr-patient-name">{rec.patient} ({rec.patientId})</span>
                 </div>
                 <div className="emr-doc-info">
                   <span className="emr-lbl">Attending Physician:</span>
-                  <span className="emr-doc-name">{record.doctor_name}</span>
+                  <span className="emr-doc-name">{rec.doctor}</span>
                 </div>
               </div>
 
-              {record.diagnosis && <div className="emr-diagnosis-box">
-                <span className="diag-label">Clinical Diagnosis:</span>
-                <p className="diag-text">{record.diagnosis}</p>
-              </div>}
+              <div className="emr-diagnosis-box">
+                <span className="diag-label">Clinical Diagnosis (ICD-10):</span>
+                <p className="diag-text">{rec.diagnosis}</p>
+              </div>
 
               <div className="emr-sections-grid">
-                {record.reason && <div className="emr-sec-block">
-                  <span className="sec-title">Reason for visit:</span>
-                  <p className="sec-body">{record.reason}</p>
-                </div>}
-                {record.treatment_plan && <div className="emr-sec-block">
-                  <span className="sec-title">Treatment plan:</span>
-                  <p className="sec-body text-teal font-semibold">{record.treatment_plan}</p>
-                </div>}
-                {record.clinical_notes && <div className="emr-sec-block">
-                  <span className="sec-title">Clinical notes:</span>
-                  <p className="sec-body">{record.clinical_notes}</p>
-                </div>}
+                <div className="emr-sec-block">
+                  <span className="sec-title">Presenting Symptoms:</span>
+                  <p className="sec-body">{rec.symptoms}</p>
+                </div>
+                <div className="emr-sec-block">
+                  <span className="sec-title">Clinical Observations & Vitals:</span>
+                  <p className="sec-body">{rec.observations}</p>
+                </div>
+                <div className="emr-sec-block">
+                  <span className="sec-title">Prescribed Treatment & Titration Plan:</span>
+                  <p className="sec-body text-teal font-semibold">{rec.treatment}</p>
+                </div>
+              </div>
+
+              <div className="emr-attachments-row">
+                <span className="attach-lbl">Diagnostic Attachments:</span>
+                <div className="attach-pills-list">
+                  {rec.reports.map((r) => (
+                    <button
+                      type="button"
+                      key={r}
+                      className="attach-pill"
+                      aria-label={`Download sample summary for ${r}`}
+                      onClick={() => {
+                        const summary = [
+                          'SmartHealthcare generated sample attachment summary',
+                          `Attachment listed in demo data: ${r}`,
+                          'This text summary is generated from the sample record. The source diagnostic file is not included.',
+                          `Patient: ${rec.patient} (${rec.patientId})`,
+                          `Date: ${rec.date}`,
+                          `Attending physician: ${rec.doctor}`,
+                          `Diagnosis: ${rec.diagnosis}`,
+                          `Presenting symptoms: ${rec.symptoms}`,
+                          `Clinical observations: ${rec.observations}`,
+                          `Treatment plan: ${rec.treatment}`,
+                        ].join('\n');
+                        downloadTextFile(r.replace(/\.pdf$/i, '-demo-summary.txt'), summary);
+                      }}
+                    >
+                      <Download size={13} /> {r}
+                    </button>
+                  ))}
+                </div>
               </div>
             </Card>
           ))}
@@ -1345,7 +1392,6 @@ export default function ModuleView() {
   // 6. PRESCRIPTIONS
   // --------------------------------------------------------------------------
   const renderPrescriptionsView = () => {
-    const eligibleAppointments = appointments.filter((appointment) => ['CONFIRMED', 'COMPLETED'].includes(appointment.status));
     const savePrescriptionNote = async (prescriptionCode) => {
       const note = (prescriptionDrafts[prescriptionCode] || '').trim();
       if (!note) {
@@ -1377,51 +1423,24 @@ export default function ModuleView() {
           <div className="module-header-info">
             <div className="module-badge-row">
               <Badge variant="teal" size="sm" dot>
-                MongoDB Prescription Records
+                Electronic Prescribing Subsystem
               </Badge>
-              <span className="module-entity-count">{prescriptions.length} Prescriptions</span>
+              <span className="module-entity-count">{PRESCRIPTIONS_DATA.length} Authorized Rx</span>
             </div>
             <h1 className="module-title">e-Prescriptions & Pharmacy Dispensary</h1>
             <p className="module-subtitle">
-              {isPatient
-                ? 'Prescriptions shared by your care team are stored securely and shown only to you, your treating doctor, and administrators.'
-                : 'Doctors can write prescriptions for their confirmed visits. Patients and administrators can view the saved prescription; clinician notes stay private to their author.'}
+              Demo prescription records. Doctors and administrators can add private, account-linked notes to each record.
             </p>
           </div>
-          {isDoctor && (
-            <div className="module-actions-row">
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => { setPrescriptionCreateError(''); setPrescriptionCreateOpen(true); }}
-                disabled={appointmentsLoading || eligibleAppointments.length === 0}
-              >
-                <PlusCircle size={15} /> Write Prescription
-              </Button>
-            </div>
-          )}
         </div>
 
         {prescriptionError && <p className="module-subtitle" role="alert">{prescriptionError}</p>}
-        {prescriptionNotesError && <p className="module-subtitle" role="alert">{prescriptionNotesError}</p>}
         {prescriptionSuccess && <p className="module-subtitle" role="status">{prescriptionSuccess}</p>}
-        {dataExchangeError && <p className="module-subtitle" role="alert">{dataExchangeError}</p>}
-        {dataExchangeSuccess && <p className="module-subtitle" role="status">{dataExchangeSuccess}</p>}
-        {prescriptionLoading && <Card>Loading prescriptions from MongoDB…</Card>}
-        {isDoctor && !appointmentsLoading && !appointmentError && appointments.length === 0 && (
-          <Card>There are no appointments assigned to you yet. A confirmed or completed visit is required before you can write a prescription.</Card>
-        )}
-        {isDoctor && !appointmentsLoading && appointments.length > 0 && eligibleAppointments.length === 0 && (
-          <Card>Your visits need to be confirmed or completed before you can write a prescription.</Card>
-        )}
-        {isDoctor && appointmentError && <p className="module-subtitle" role="alert">{appointmentError}</p>}
+        {prescriptionLoading && <Card>Loading your saved prescription notes…</Card>}
 
         <div className="prescriptions-grid">
-          {!prescriptionLoading && !prescriptionError && prescriptions.length === 0 && (
-            <Card>{isPatient ? 'Your care team has not shared a prescription with you yet.' : 'No prescription records are available for this account.'}</Card>
-          )}
-          {!prescriptionLoading && prescriptions.map((rx) => (
-            <Card key={rx.prescription_id} className="prescription-card-item" hoverable>
+          {PRESCRIPTIONS_DATA.map((rx) => (
+            <Card key={rx.id} className="prescription-card-item" hoverable>
               <div className="rx-card-top">
                 <div className="rx-badge-box">
                   <Pill size={22} className="text-teal" />
@@ -1450,197 +1469,72 @@ export default function ModuleView() {
                   </div>
                   <div className="rx-meta-cell">
                     <span className="rx-lbl">Prescribed For:</span>
-                    <span className="rx-val">{rx.patient_name}</span>
+                    <span className="rx-val">{rx.patient}</span>
                   </div>
                   <div className="rx-meta-cell">
                     <span className="rx-lbl">Authorizing Physician:</span>
-                    <span className="rx-val">{rx.doctor_name}</span>
+                    <span className="rx-val">{rx.doctor}</span>
                   </div>
                 </div>
 
                 <div className="rx-pharmacy-status">
                   <CheckCircle2 size={15} className="text-success" />
-                  <span>{rx.pharmacy || 'No pharmacy selected'}</span>
+                  <span>{rx.pharmacy}</span>
                 </div>
 
-                {rx.clinical_note && <div className="payload-meta-box"><strong>Doctor's note:</strong> {rx.clinical_note}</div>}
-
-                {!isPatient && (
-                  <div className="form-group-field rx-notes-field">
-                    <label className="form-lbl" htmlFor={`prescription-note-${rx.prescription_id}`}>Private clinician note</label>
-                    <textarea
-                      id={`prescription-note-${rx.prescription_id}`}
-                      rows={3}
-                      maxLength={5000}
-                      className="module-textarea-input"
-                      placeholder="Write a private note for your own account…"
-                      value={prescriptionDrafts[rx.prescription_id] ?? prescriptionNotes[rx.prescription_id] ?? ''}
-                      onChange={(event) => setPrescriptionDrafts((items) => ({ ...items, [rx.prescription_id]: event.target.value }))}
-                      disabled={prescriptionNotesLoading}
-                    />
-                    <span className="rx-note-privacy-hint">Only your signed-in clinician account can view this private note.</span>
-                  </div>
-                )}
+                <div className="form-group-field rx-notes-field">
+                  <label className="form-lbl" htmlFor={`prescription-note-${rx.id}`}>Private Notes</label>
+                  <textarea
+                    id={`prescription-note-${rx.id}`}
+                    rows={3}
+                    maxLength={5000}
+                    className="module-textarea-input"
+                    placeholder="Write a note for this prescription…"
+                    value={prescriptionDrafts[rx.id] ?? prescriptionNotes[rx.id] ?? ''}
+                    onChange={(event) => setPrescriptionDrafts((items) => ({ ...items, [rx.id]: event.target.value }))}
+                    disabled={prescriptionLoading}
+                  />
+                  <span className="rx-note-privacy-hint">Only your signed-in clinician account can view these notes.</span>
+                </div>
               </div>
 
               <div className="rx-card-footer">
-                <span className="rx-id-code">{rx.prescription_id} · {new Date(rx.created_at).toLocaleDateString()}</span>
-                {!isPatient && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={prescriptionNotesLoading || prescriptionSaving}
-                    onClick={() => savePrescriptionNote(rx.prescription_id)}
-                  >
-                    Save Private Note
-                  </Button>
-                )}
+                <span className="rx-id-code">{rx.id} • Authorized on {rx.date}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={prescriptionLoading || prescriptionSaving}
+                  onClick={() => savePrescriptionNote(rx.id)}
+                >
+                  Save Note
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => {
                     const slip = [
-                      'SmartHealthcare prescription details',
-                      `Prescription: ${rx.prescription_id}`,
-                      `Date: ${new Date(rx.created_at).toLocaleDateString()}`,
-                      `Patient: ${rx.patient_name}`,
-                      `Prescribing doctor: ${rx.doctor_name}`,
+                      'SmartHealthcare sample prescription details',
+                      `Prescription: ${rx.id}`,
+                      `Date: ${rx.date}`,
+                      `Patient: ${rx.patient}`,
+                      `Prescribing doctor: ${rx.doctor}`,
                       `Medication: ${rx.medication}`,
                       `Strength: ${rx.strength}`,
                       `Dosage: ${rx.dosage}`,
                       `Quantity: ${rx.quantity}`,
-                      `Refills authorized: ${rx.refills}`,
-                      `Pharmacy: ${rx.pharmacy || 'Not selected'}`,
-                      rx.clinical_note ? `Doctor's note: ${rx.clinical_note}` : '',
+                      `Refills: ${rx.refills}`,
+                      `Pharmacy: ${rx.pharmacy}`,
+                      'This file contains fictional sample data for demonstration only.',
                     ].join('\n');
-                    downloadTextFile(`prescription-${rx.prescription_id}.txt`, slip);
+                    downloadTextFile(`sample-prescription-${rx.id}.txt`, slip);
                   }}
                 >
                   <Download size={13} /> Download Rx Details
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => { setDataExchangeError(''); setDataExchangeSuccess(''); setPreparedFHIRShare(null); setSelectedPrescriptionToShare(rx); }}
-                >
-                  <ArrowLeftRight size={14} /> Prepare Hospital Share
                 </Button>
               </div>
             </Card>
           ))}
         </div>
-
-        {prescriptionCreateOpen && isDoctor && (
-          <div className="sh-modal-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget && !prescriptionCreateSaving) setPrescriptionCreateOpen(false); }}>
-            <div className="sh-modal-content animate-fade-scale" role="dialog" aria-modal="true" aria-labelledby="prescription-create-title">
-              <div className="sh-modal-header">
-                <div>
-                  <h3 id="prescription-create-title" className="text-white">Write Patient Prescription</h3>
-                  <p className="text-sm text-secondary">Saved clinical data is visible to the selected patient and care administrators.</p>
-                </div>
-                <button type="button" className="sh-modal-close-btn" onClick={() => setPrescriptionCreateOpen(false)} aria-label="Close prescription form" disabled={prescriptionCreateSaving}><X size={18} /></button>
-              </div>
-
-              <form onSubmit={createPrescription} className="modal-form-body">
-                <div className="form-group-field">
-                  <label className="form-lbl" htmlFor="prescription-appointment">Appointment / patient</label>
-                  <select id="prescription-appointment" className="module-select-input" name="appointment_id" defaultValue="" required>
-                    <option value="" disabled>Select a confirmed or completed visit</option>
-                    {appointments.filter((appointment) => ['CONFIRMED', 'COMPLETED'].includes(appointment.status)).map((appointment) => (
-                      <option key={appointment.id} value={appointment.id}>#{appointment.id} · {appointment.patient_name} · {appointment.appointment_date}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-row-2">
-                  <div className="form-group-field">
-                    <label className="form-lbl" htmlFor="prescription-medication">Medication</label>
-                    <input id="prescription-medication" name="medication" className="module-text-input" maxLength={240} required />
-                  </div>
-                  <div className="form-group-field">
-                    <label className="form-lbl" htmlFor="prescription-strength">Strength</label>
-                    <input id="prescription-strength" name="strength" className="module-text-input" maxLength={100} placeholder="e.g. 10 mg" required />
-                  </div>
-                </div>
-                <div className="form-group-field">
-                  <label className="form-lbl" htmlFor="prescription-dosage">Dosage instructions</label>
-                  <textarea id="prescription-dosage" name="dosage" className="module-textarea-input" rows={3} minLength={3} maxLength={2000} required />
-                </div>
-                <div className="form-row-2">
-                  <div className="form-group-field">
-                    <label className="form-lbl" htmlFor="prescription-quantity">Quantity</label>
-                    <input id="prescription-quantity" name="quantity" className="module-text-input" maxLength={100} placeholder="e.g. 30 tablets" required />
-                  </div>
-                  <div className="form-group-field">
-                    <label className="form-lbl" htmlFor="prescription-refills">Refills</label>
-                    <input id="prescription-refills" name="refills" type="number" className="module-text-input" min={0} max={20} defaultValue={0} required />
-                  </div>
-                </div>
-                <div className="form-group-field">
-                  <label className="form-lbl" htmlFor="prescription-pharmacy">Preferred pharmacy (optional)</label>
-                  <input id="prescription-pharmacy" name="pharmacy" className="module-text-input" maxLength={240} />
-                </div>
-                <div className="form-group-field">
-                  <label className="form-lbl" htmlFor="prescription-clinical-note">Note for the patient (optional)</label>
-                  <textarea id="prescription-clinical-note" name="clinical_note" className="module-textarea-input" rows={2} maxLength={3000} />
-                </div>
-                {prescriptionCreateError && <p className="module-subtitle" role="alert">{prescriptionCreateError}</p>}
-                <div className="modal-actions-bar">
-                  <Button type="button" variant="outline" onClick={() => setPrescriptionCreateOpen(false)} disabled={prescriptionCreateSaving}>Cancel</Button>
-                  <Button type="submit" variant="primary" loading={prescriptionCreateSaving}>Save & Share with Patient</Button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {selectedPrescriptionToShare && (
-          <div className="sh-modal-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget && !hospitalShareSaving) { setSelectedPrescriptionToShare(null); setPreparedFHIRShare(null); } }}>
-            <div className="sh-modal-content animate-fade-scale" role="dialog" aria-modal="true" aria-labelledby="prescription-share-title">
-              <div className="sh-modal-header">
-                <div>
-                  <h3 id="prescription-share-title" className="text-white">Prepare Hospital Share</h3>
-                  <p className="text-sm text-secondary">{selectedPrescriptionToShare.medication} · {selectedPrescriptionToShare.patient_name}</p>
-                </div>
-                <button type="button" className="sh-modal-close-btn" onClick={() => { setSelectedPrescriptionToShare(null); setPreparedFHIRShare(null); }} aria-label="Close hospital sharing form" disabled={hospitalShareSaving}><X size={18} /></button>
-              </div>
-
-              <form onSubmit={prepareHospitalShare} className="modal-form-body">
-                {preparedFHIRShare ? (
-                  <>
-                    <p className="module-subtitle" role="status">A consent-logged FHIR package is stored in MongoDB. This application has not sent it to the hospital; use your organization's approved secure exchange channel.</p>
-                    <div className="modal-actions-bar">
-                      <Button type="button" variant="outline" onClick={() => downloadTextFile(`fhir-prescription-${preparedFHIRShare.prescription_id}.json`, JSON.stringify(preparedFHIRShare.payload, null, 2), 'application/fhir+json;charset=utf-8')}>
-                        <Download size={14} /> Download FHIR JSON
-                      </Button>
-                      <Button type="button" variant="primary" onClick={() => { setSelectedPrescriptionToShare(null); setPreparedFHIRShare(null); }}>Done</Button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <p className="module-subtitle" role="note">This creates a consent-logged FHIR R4 export package in MongoDB. It does not send patient data to another hospital because no partner API is connected yet.</p>
-                    <div className="form-group-field">
-                      <label className="form-lbl" htmlFor="share-destination-hospital">Destination hospital</label>
-                      <input id="share-destination-hospital" name="destination_hospital" className="module-text-input" minLength={2} maxLength={200} placeholder="Enter the receiving hospital" required />
-                    </div>
-                    <label className="share-consent-row">
-                      <input type="checkbox" name="patient_consent" required />
-                      <span>{isPatient ? 'I authorize sharing this prescription with the named hospital.' : 'The patient has explicitly consented to share this prescription with the named hospital.'}</span>
-                    </label>
-                    <label className="share-consent-row">
-                      <input type="checkbox" name="include_visit_notes" />
-                      <span>Include diagnosis, treatment plan, and visit notes in the FHIR export.</span>
-                    </label>
-                    {dataExchangeError && <p className="module-subtitle" role="alert">{dataExchangeError}</p>}
-                    <div className="modal-actions-bar">
-                      <Button type="button" variant="outline" onClick={() => { setSelectedPrescriptionToShare(null); setPreparedFHIRShare(null); }} disabled={hospitalShareSaving}>Cancel</Button>
-                      <Button type="submit" variant="primary" loading={hospitalShareSaving}>Prepare FHIR Export</Button>
-                    </div>
-                  </>
-                )}
-              </form>
-            </div>
-          </div>
-        )}
       </div>
     );
   };
@@ -1655,70 +1549,64 @@ export default function ModuleView() {
           <div className="module-header-info">
             <div className="module-badge-row">
               <Badge variant="cyan" size="sm" dot>
-                Consent-Logged FHIR R4 Exchange
+                FHIR R4 / HL7 Interoperability Gateway
               </Badge>
-              <span className="module-entity-count">{dataExchangeEvents.length} Share Records</span>
+              <span className="module-entity-count">{DATA_EXCHANGE_DATA.length} Transactions</span>
             </div>
-            <h1 className="module-title">Health Information Exchange</h1>
+            <h1 className="module-title">Health Information Exchange (HIE) Stream</h1>
             <p className="module-subtitle">
-              Review patient-approved prescription shares. FHIR packages are stored in MongoDB and ready to export; direct delivery requires a configured partner hospital endpoint.
+              Cross-network clinical data exchange router supporting FHIR R4 JSON bundles, HL7 v2 ADT feeds, and C-CDA continuity documents.
             </p>
-          </div>
-          <div className="module-actions-row">
-            <Button variant="primary" size="sm" onClick={() => navigate('/prescriptions')}>
-              <Pill size={14} /> View Prescriptions to Share
-            </Button>
           </div>
         </div>
 
-        {dataExchangeError && <p className="module-subtitle" role="alert">{dataExchangeError}</p>}
-        {dataExchangeSuccess && <p className="module-subtitle" role="status">{dataExchangeSuccess}</p>}
+        {/* Data Exchange Flow Representation */}
         <div className="data-exchange-stream-list">
-          {dataExchangeLoading && <Card>Loading MongoDB exchange records…</Card>}
-          {!dataExchangeLoading && !dataExchangeError && dataExchangeEvents.length === 0 && (
-            <Card>No hospital share packages have been prepared from this account yet.</Card>
-          )}
-          {!dataExchangeLoading && dataExchangeEvents.map((tx) => (
-            <Card key={tx.share_id} className="exchange-tx-card" hoverable>
+          {DATA_EXCHANGE_DATA.map((tx) => (
+            <Card key={tx.txId} className="exchange-tx-card" hoverable>
               <div className="exchange-card-top">
                 <div className="exchange-protocol-group">
                   <ArrowLeftRight size={18} className="text-cyan" />
-                  <strong>Share {tx.share_id.slice(0, 10)}</strong>
+                  <strong>{tx.txId}</strong>
                   <Badge variant="cyan" size="sm">{tx.protocol}</Badge>
                 </div>
-                <Badge variant={tx.status === 'READY_FOR_EXPORT' ? 'warning' : 'success'} size="sm">
-                  {tx.status.replaceAll('_', ' ')}
+                <Badge
+                  variant={tx.status === 'Completed' ? 'success' : 'warning'}
+                  size="sm"
+                >
+                  {tx.status}
                 </Badge>
               </div>
 
+              {/* Visual Flow Representation */}
               <div className="exchange-flow-visual">
                 <div className="flow-node flow-source">
-                  <span className="node-lbl">Patient / Care Team</span>
-                  <span className="node-name">{tx.patient_name} · {tx.doctor_name}</span>
+                  <span className="node-lbl">Source Node</span>
+                  <span className="node-name">{tx.source}</span>
                 </div>
                 <div className="flow-arrow-beam">
                   <div className="beam-line" />
                   <ArrowRight size={16} className="text-cyan" />
                 </div>
                 <div className="flow-node flow-dest">
-                  <span className="node-lbl">Receiving Hospital</span>
-                  <span className="node-name">{tx.destination_hospital}</span>
+                  <span className="node-lbl">Destination Gateway</span>
+                  <span className="node-name">{tx.destination}</span>
                 </div>
               </div>
 
               <div className="exchange-card-footer">
                 <div className="exchange-hash">
                   <Lock size={13} className="text-success" />
-                  <span>SHA256: <code>{tx.payload_digest.slice(0, 20)}…</code></span>
+                  <span>Hash: <code>{tx.hash}</code></span>
                 </div>
                 <div className="exchange-time-actions">
-                  <span className="tx-time">{new Date(tx.created_at).toLocaleString()}</span>
+                  <span className="tx-time">{tx.timestamp}</span>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => inspectExchangePayload(tx)}
+                    onClick={() => setSelectedTx(tx)}
                   >
-                    <FileCode size={13} /> Inspect FHIR Package
+                    <FileCode size={13} /> Inspect Payload
                   </Button>
                 </div>
               </div>
@@ -1732,7 +1620,7 @@ export default function ModuleView() {
             <div className="sh-modal-content animate-fade-scale">
               <div className="sh-modal-header">
                 <div>
-                  <h3 className="text-white">FHIR Export Package</h3>
+                  <h3 className="text-white">Serialized Payload Inspector</h3>
                   <p className="text-sm text-secondary">{selectedTx.txId} • {selectedTx.protocol}</p>
                 </div>
                 <button
@@ -1759,16 +1647,10 @@ export default function ModuleView() {
 
                 <div className="modal-actions-bar">
                   <Button
-                    variant="outline"
-                    onClick={() => downloadTextFile(`fhir-share-${selectedTx.txId}.json`, JSON.stringify(selectedTx.payloadSample, null, 2), 'application/fhir+json;charset=utf-8')}
-                  >
-                    <Download size={14} /> Download FHIR JSON
-                  </Button>
-                  <Button
                     variant="primary"
                     onClick={() => setSelectedTx(null)}
                   >
-                    Close
+                    Close Inspector
                   </Button>
                 </div>
               </div>
@@ -1945,7 +1827,14 @@ export default function ModuleView() {
     );
   };
 
-  const previewOnlyPaths = new Set(['/analytics', '/settings']);
+  const previewOnlyPaths = new Set([
+    '/patients',
+    '/medical-records',
+    '/prescriptions',
+    '/data-exchange',
+    '/analytics',
+    '/settings',
+  ]);
 
   return (
     <DashboardLayout>
