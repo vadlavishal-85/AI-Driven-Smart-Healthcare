@@ -12,7 +12,6 @@ import {
   Activity,
   Database,
   ArrowLeftRight,
-  Video,
   PlusCircle,
   RefreshCw,
 } from 'lucide-react';
@@ -270,11 +269,11 @@ function DoctorDashboard({ currentUser, navigate }) {
                 <div className="doc-apt-actions">
                   {apt.type.includes('Telehealth') ? (
                     <Button
-                      variant="outline"
+                      variant="primary"
                       size="sm"
-                      onClick={() => alert(`Initiating encrypted telehealth session for ${apt.patient}...`)}
+                      onClick={() => navigate('/appointments')}
                     >
-                      <Video size={14} /> Start Video
+                      <Calendar size={14} /> Open Appointments
                     </Button>
                   ) : (
                     <Button
@@ -478,16 +477,16 @@ function PatientDashboard({ currentUser, navigate }) {
                   <Button
                     variant="primary"
                     size="sm"
-                    onClick={() => alert('Attendance confirmed for Oct 14 consultation.')}
+                    onClick={() => navigate('/appointments')}
                   >
-                    Confirm Attendance
+                    View Appointments
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => navigate('/appointments')}
                   >
-                    Reschedule
+                    Book New Visit
                   </Button>
                 </div>
               </div>

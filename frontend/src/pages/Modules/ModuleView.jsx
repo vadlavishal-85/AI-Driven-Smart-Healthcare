@@ -31,6 +31,23 @@ import './ModuleView.css';
 import { useAuth } from '../../context/useAuth';
 import { apiFetch } from '../../services/api';
 
+function downloadTextFile(fileName, contents, mimeType = 'text/plain;charset=utf-8') {
+  const file = new Blob([contents], { type: mimeType });
+  const downloadUrl = URL.createObjectURL(file);
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.download = fileName;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+}
+
+function toCsvCell(value) {
+  return `"${String(value ?? '').replaceAll('"', '""')}"`;
+}
+
 // ============================================================================
 // Sample content used only by the preview-only modules below.
 // ============================================================================
@@ -391,9 +408,22 @@ export default function ModuleView() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => alert('Exporting encrypted patient demographic roster (CSV/PDF)...')}
+              onClick={() => {
+                const columns = [
+                  ['id', 'ID'], ['name', 'Name'], ['age', 'Age'], ['gender', 'Gender'],
+                  ['bloodGroup', 'Blood group'], ['phone', 'Phone'], ['email', 'Email'],
+                  ['condition', 'Condition'], ['doctor', 'Doctor'], ['department', 'Department'],
+                  ['status', 'Status'], ['room', 'Location'], ['admissionDate', 'Admission date'],
+                ];
+                const rows = [
+                  columns.map(([, label]) => label),
+                  ...filtered.map((patient) => columns.map(([key]) => patient[key])),
+                ];
+                const csv = rows.map((row) => row.map(toCsvCell).join(',')).join('\r\n');
+                downloadTextFile('sample-patient-registry.csv', `\uFEFF${csv}`, 'text/csv;charset=utf-8');
+              }}
             >
-              <Download size={14} /> Export Registry
+              <Download size={14} /> Export Registry CSV
             </Button>
           </div>
         </div>
@@ -962,13 +992,29 @@ export default function ModuleView() {
                 <span className="attach-lbl">Diagnostic Attachments:</span>
                 <div className="attach-pills-list">
                   {rec.reports.map((r) => (
-                    <span
+                    <button
+                      type="button"
                       key={r}
                       className="attach-pill"
-                      onClick={() => alert(`Downloading verified document: ${r}`)}
+                      aria-label={`Download sample summary for ${r}`}
+                      onClick={() => {
+                        const summary = [
+                          'SmartHealthcare generated sample attachment summary',
+                          `Attachment listed in demo data: ${r}`,
+                          'This text summary is generated from the sample record. The source diagnostic file is not included.',
+                          `Patient: ${rec.patient} (${rec.patientId})`,
+                          `Date: ${rec.date}`,
+                          `Attending physician: ${rec.doctor}`,
+                          `Diagnosis: ${rec.diagnosis}`,
+                          `Presenting symptoms: ${rec.symptoms}`,
+                          `Clinical observations: ${rec.observations}`,
+                          `Treatment plan: ${rec.treatment}`,
+                        ].join('\n');
+                        downloadTextFile(r.replace(/\.pdf$/i, '-demo-summary.txt'), summary);
+                      }}
                     >
                       <Download size={13} /> {r}
-                    </span>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -1050,9 +1096,25 @@ export default function ModuleView() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => alert(`Downloading PDF receipt for prescription ${rx.id}...`)}
+                  onClick={() => {
+                    const slip = [
+                      'SmartHealthcare sample prescription details',
+                      `Prescription: ${rx.id}`,
+                      `Date: ${rx.date}`,
+                      `Patient: ${rx.patient}`,
+                      `Prescribing doctor: ${rx.doctor}`,
+                      `Medication: ${rx.medication}`,
+                      `Strength: ${rx.strength}`,
+                      `Dosage: ${rx.dosage}`,
+                      `Quantity: ${rx.quantity}`,
+                      `Refills: ${rx.refills}`,
+                      `Pharmacy: ${rx.pharmacy}`,
+                      'This file contains fictional sample data for demonstration only.',
+                    ].join('\n');
+                    downloadTextFile(`sample-prescription-${rx.id}.txt`, slip);
+                  }}
                 >
-                  <Download size={13} /> Print Rx Slip
+                  <Download size={13} /> Download Rx Details
                 </Button>
               </div>
             </Card>
