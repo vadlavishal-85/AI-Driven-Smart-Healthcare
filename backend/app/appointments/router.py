@@ -92,8 +92,23 @@ def create_appointment(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    if _role(current_user) != RoleEnum.PATIENT.value:
-        raise HTTPException(status_code=403, detail="Only patients can self-book an appointment.")
+    role = _role(current_user)
+    if role == RoleEnum.PATIENT.value:
+        if request.patient_id is not None:
+            raise HTTPException(status_code=403, detail="Patients can only book appointments for their own account.")
+        patient = current_user
+    elif role == RoleEnum.ADMIN.value:
+        if request.patient_id is None:
+            raise HTTPException(status_code=422, detail="Select a patient for this appointment.")
+        patient = db.query(User).filter(
+            User.id == request.patient_id,
+            User.is_active.is_(True),
+            User.role.has(name=RoleEnum.PATIENT.value),
+        ).first()
+        if not patient:
+            raise HTTPException(status_code=404, detail="The selected patient account is not available.")
+    else:
+        raise HTTPException(status_code=403, detail="Only patients and administrators can book an appointment.")
     if request.appointment_date < date.today():
         raise HTTPException(status_code=422, detail="Appointment date must be today or later.")
 
@@ -116,7 +131,7 @@ def create_appointment(
         raise HTTPException(status_code=409, detail="That doctor already has an appointment at this time.")
 
     appointment = Appointment(
-        patient_id=current_user.id,
+        patient_id=patient.id,
         doctor_id=doctor.id,
         appointment_date=request.appointment_date,
         appointment_time=request.appointment_time,

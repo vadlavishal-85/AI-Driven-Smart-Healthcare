@@ -238,6 +238,10 @@ export default function ModuleView() {
   const [patientsError, setPatientsError] = useState('');
   const [patientsSuccess, setPatientsSuccess] = useState('');
   const [patientActionId, setPatientActionId] = useState(null);
+  const [doctorsLoading, setDoctorsLoading] = useState(false);
+  const [adminAccountModal, setAdminAccountModal] = useState(null);
+  const [adminAccountSaving, setAdminAccountSaving] = useState(false);
+  const [adminAppointmentPatient, setAdminAppointmentPatient] = useState(null);
   const [prescriptionNotes, setPrescriptionNotes] = useState({});
   const [prescriptionDrafts, setPrescriptionDrafts] = useState({});
   const [prescriptionLoading, setPrescriptionLoading] = useState(false);
@@ -291,6 +295,17 @@ export default function ModuleView() {
     }
   }, []);
 
+  const loadAdminDoctors = useCallback(async () => {
+    setDoctorsLoading(true);
+    try {
+      setDoctors(await apiFetch('/appointments/doctors'));
+    } catch (error) {
+      setPatientsError(error.message || 'Unable to load doctors for appointment assignment.');
+    } finally {
+      setDoctorsLoading(false);
+    }
+  }, []);
+
   const loadPrescriptionNotes = useCallback(async () => {
     setPrescriptionLoading(true);
     setPrescriptionError('');
@@ -312,6 +327,7 @@ export default function ModuleView() {
     }
     if (location.pathname === '/patients') {
       void Promise.resolve().then(loadPatients);
+      if (isAdmin) void Promise.resolve().then(loadAdminDoctors);
     }
     if (location.pathname === '/prescriptions' && !isPatient) {
       void Promise.resolve().then(loadPrescriptionNotes);
@@ -320,7 +336,7 @@ export default function ModuleView() {
       const timer = window.setTimeout(() => setNewModalOpen(true), 0);
       return () => window.clearTimeout(timer);
     }
-  }, [location.pathname, location.search, requestedDoctorId, isPatient, loadAppointments, loadPatients, loadPrescriptionNotes]);
+  }, [location.pathname, location.search, requestedDoctorId, isPatient, isAdmin, loadAppointments, loadPatients, loadAdminDoctors, loadPrescriptionNotes]);
 
   const deactivatePatient = async (patient) => {
     const patientName = `${patient.first_name} ${patient.last_name}`.trim();
@@ -336,6 +352,82 @@ export default function ModuleView() {
       setPatientsError(error.message || 'Unable to remove this patient.');
     } finally {
       setPatientActionId(null);
+    }
+  };
+
+  const createAdminAccount = async (event) => {
+    event.preventDefault();
+    if (!adminAccountModal) return;
+    const formData = new FormData(event.currentTarget);
+    const accountType = adminAccountModal;
+    setPatientsError('');
+    setPatientsSuccess('');
+    setAdminAccountSaving(true);
+    try {
+      if (accountType === 'PATIENT') {
+        const created = await apiFetch('/auth/register', {
+          method: 'POST',
+          body: JSON.stringify({
+            first_name: String(formData.get('first_name')).trim(),
+            last_name: String(formData.get('last_name')).trim(),
+            email: String(formData.get('email')).trim().toLowerCase(),
+            password: String(formData.get('password')),
+            phone: String(formData.get('phone') || '').trim() || undefined,
+            role: 'PATIENT',
+          }),
+        });
+        await loadPatients();
+        setPatientsSuccess(`Patient account created for ${created.first_name} ${created.last_name}.`);
+      } else {
+        const created = await apiFetch('/admin/doctors', {
+          method: 'POST',
+          body: JSON.stringify({
+            first_name: String(formData.get('first_name')).trim(),
+            last_name: String(formData.get('last_name')).trim(),
+            email: String(formData.get('email')).trim().toLowerCase(),
+            password: String(formData.get('password')),
+            department: String(formData.get('department')).trim(),
+            specialty: String(formData.get('specialty')).trim(),
+          }),
+        });
+        await loadAdminDoctors();
+        setPatientsSuccess(`Doctor account created for Dr. ${created.first_name} ${created.last_name}.`);
+      }
+      setAdminAccountModal(null);
+    } catch (error) {
+      setPatientsError(error.message || `Unable to create the ${accountType.toLowerCase()} account.`);
+    } finally {
+      setAdminAccountSaving(false);
+    }
+  };
+
+  const scheduleAppointmentForPatient = async (event) => {
+    event.preventDefault();
+    if (!adminAppointmentPatient) return;
+    const formData = new FormData(event.currentTarget);
+    setAppointmentError('');
+    setAppointmentSuccess('');
+    setAppointmentSaving(true);
+    try {
+      const appointment = await apiFetch('/appointments', {
+        method: 'POST',
+        body: JSON.stringify({
+          patient_id: adminAppointmentPatient.id,
+          doctor_id: Number(formData.get('doctor_id')),
+          appointment_date: formData.get('appointment_date'),
+          appointment_time: formData.get('appointment_time'),
+          reason: String(formData.get('reason')).trim(),
+        }),
+      });
+      setPatients((items) => items.map((item) => item.id === adminAppointmentPatient.id
+        ? { ...item, appointment_count: (item.appointment_count || 0) + 1 }
+        : item));
+      setAppointmentSuccess(`Appointment scheduled for ${adminAppointmentPatient.first_name} ${adminAppointmentPatient.last_name} with ${appointment.doctor_name}.`);
+      setAdminAppointmentPatient(null);
+    } catch (error) {
+      setAppointmentError(error.message || 'Unable to schedule this patient appointment.');
+    } finally {
+      setAppointmentSaving(false);
     }
   };
 
@@ -421,11 +513,31 @@ export default function ModuleView() {
             <p className="module-subtitle">
               {isDoctor
                 ? 'Review patient accounts connected to appointments assigned to you.'
-                : 'Review active patient accounts and remove access when required. Deactivated accounts keep their appointment history.'}
+                : isAdmin
+                  ? 'Register patients and doctors, assign appointments, and manage patient account access. Deactivated accounts keep their appointment history.'
+                  : 'Review active patient accounts and remove access when required. Deactivated accounts keep their appointment history.'}
             </p>
           </div>
 
           <div className="module-actions-row">
+            {isAdmin && (
+              <>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => { setPatientsError(''); setPatientsSuccess(''); setAdminAccountModal('PATIENT'); }}
+                >
+                  <PlusCircle size={14} /> Register Patient
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => { setPatientsError(''); setPatientsSuccess(''); setAdminAccountModal('DOCTOR'); }}
+                >
+                  <Stethoscope size={14} /> Register Doctor
+                </Button>
+              </>
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -452,6 +564,8 @@ export default function ModuleView() {
 
         {patientsError && <p className="module-subtitle" role="alert">{patientsError}</p>}
         {patientsSuccess && <p className="module-subtitle" role="status">{patientsSuccess}</p>}
+        {appointmentError && <p className="module-subtitle" role="alert">{appointmentError}</p>}
+        {appointmentSuccess && <p className="module-subtitle" role="status">{appointmentSuccess}</p>}
 
         <div className="module-filter-bar">
           <div className="module-search-wrap">
@@ -503,6 +617,21 @@ export default function ModuleView() {
               </div>
 
               <div className="patient-card-footer">
+                {isAdmin && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => {
+                      setAppointmentError('');
+                      setAppointmentSuccess('');
+                      setAdminAppointmentPatient(patient);
+                    }}
+                    disabled={doctorsLoading || doctors.length === 0}
+                    title={doctors.length === 0 ? 'Register a doctor before scheduling an appointment.' : undefined}
+                  >
+                    <Calendar size={14} /> Assign Doctor
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
@@ -1024,6 +1153,133 @@ export default function ModuleView() {
             </Card>
           ))}
         </div>
+
+        {adminAccountModal && isAdmin && (
+          <div className="sh-modal-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget && !adminAccountSaving) setAdminAccountModal(null); }}>
+            <div className="sh-modal-content animate-fade-scale" role="dialog" aria-modal="true" aria-labelledby="admin-account-modal-title">
+              <div className="sh-modal-header">
+                <div>
+                  <h3 id="admin-account-modal-title" className="text-white">
+                    {adminAccountModal === 'PATIENT' ? 'Register New Patient' : 'Register New Doctor'}
+                  </h3>
+                  <p className="text-sm text-secondary">
+                    {adminAccountModal === 'PATIENT'
+                      ? 'Create a patient sign-in account for this healthcare system.'
+                      : 'Create an active doctor account and specialist profile.'}
+                  </p>
+                </div>
+                <button type="button" className="sh-modal-close-btn" onClick={() => setAdminAccountModal(null)} aria-label="Close account form" disabled={adminAccountSaving}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={createAdminAccount} className="modal-form-body">
+                <div className="form-row-2">
+                  <div className="form-group-field">
+                    <label className="form-lbl" htmlFor="admin-account-first-name">First name</label>
+                    <input id="admin-account-first-name" className="module-text-input" name="first_name" autoComplete="given-name" maxLength={100} required />
+                  </div>
+                  <div className="form-group-field">
+                    <label className="form-lbl" htmlFor="admin-account-last-name">Last name</label>
+                    <input id="admin-account-last-name" className="module-text-input" name="last_name" autoComplete="family-name" maxLength={100} required />
+                  </div>
+                </div>
+
+                <div className="form-group-field">
+                  <label className="form-lbl" htmlFor="admin-account-email">Email address</label>
+                  <input id="admin-account-email" className="module-text-input" name="email" type="email" autoComplete="email" maxLength={255} required />
+                </div>
+
+                {adminAccountModal === 'PATIENT' ? (
+                  <div className="form-group-field">
+                    <label className="form-lbl" htmlFor="admin-account-phone">Phone (optional)</label>
+                    <input id="admin-account-phone" className="module-text-input" name="phone" type="tel" autoComplete="tel" maxLength={20} />
+                  </div>
+                ) : (
+                  <div className="form-row-2">
+                    <div className="form-group-field">
+                      <label className="form-lbl" htmlFor="admin-account-department">Department</label>
+                      <input id="admin-account-department" className="module-text-input" name="department" maxLength={120} minLength={2} placeholder="e.g. Cardiology" required />
+                    </div>
+                    <div className="form-group-field">
+                      <label className="form-lbl" htmlFor="admin-account-specialty">Specialty</label>
+                      <input id="admin-account-specialty" className="module-text-input" name="specialty" maxLength={180} minLength={2} placeholder="e.g. Interventional cardiology" required />
+                    </div>
+                  </div>
+                )}
+
+                <div className="form-group-field">
+                  <label className="form-lbl" htmlFor="admin-account-password">Initial password</label>
+                  <input id="admin-account-password" className="module-text-input" name="password" type="password" autoComplete="new-password" minLength={adminAccountModal === 'DOCTOR' ? 12 : 8} maxLength={128} required />
+                  <span className="text-sm text-secondary">
+                    {adminAccountModal === 'DOCTOR'
+                      ? 'Use at least 12 characters. Share this initial password with the doctor securely.'
+                      : 'Use at least 8 characters and share the sign-in details with the patient.'}
+                  </span>
+                </div>
+
+                {patientsError && <p className="module-subtitle" role="alert">{patientsError}</p>}
+                <div className="modal-actions-bar">
+                  <Button type="button" variant="outline" onClick={() => setAdminAccountModal(null)} disabled={adminAccountSaving}>Cancel</Button>
+                  <Button type="submit" variant="primary" loading={adminAccountSaving}>
+                    {adminAccountModal === 'PATIENT' ? 'Create Patient Account' : 'Create Doctor Account'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {adminAppointmentPatient && isAdmin && (
+          <div className="sh-modal-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget && !appointmentSaving) setAdminAppointmentPatient(null); }}>
+            <div className="sh-modal-content animate-fade-scale" role="dialog" aria-modal="true" aria-labelledby="admin-appointment-modal-title">
+              <div className="sh-modal-header">
+                <div>
+                  <h3 id="admin-appointment-modal-title" className="text-white">Schedule Patient Appointment</h3>
+                  <p className="text-sm text-secondary">
+                    Assign a doctor to {adminAppointmentPatient.first_name} {adminAppointmentPatient.last_name}.
+                  </p>
+                </div>
+                <button type="button" className="sh-modal-close-btn" onClick={() => setAdminAppointmentPatient(null)} aria-label="Close appointment form" disabled={appointmentSaving}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={scheduleAppointmentForPatient} className="modal-form-body">
+                <div className="form-group-field">
+                  <label className="form-lbl" htmlFor="admin-appointment-doctor">Attending doctor</label>
+                  <select id="admin-appointment-doctor" className="module-select-input" name="doctor_id" required defaultValue="" disabled={doctorsLoading || doctors.length === 0}>
+                    <option value="" disabled>{doctorsLoading ? 'Loading doctors…' : 'Select a doctor'}</option>
+                    {doctors.map((doctor) => <option key={doctor.id} value={doctor.id}>{doctor.name} · {doctor.department} · {doctor.specialty}</option>)}
+                  </select>
+                </div>
+
+                <div className="form-row-2">
+                  <div className="form-group-field">
+                    <label className="form-lbl" htmlFor="admin-appointment-date">Date</label>
+                    <input id="admin-appointment-date" className="module-text-input" type="date" name="appointment_date" min={minimumAppointmentDate} defaultValue={minimumAppointmentDate} required />
+                  </div>
+                  <div className="form-group-field">
+                    <label className="form-lbl" htmlFor="admin-appointment-time">Time</label>
+                    <input id="admin-appointment-time" className="module-text-input" type="time" name="appointment_time" required />
+                  </div>
+                </div>
+
+                <div className="form-group-field">
+                  <label className="form-lbl" htmlFor="admin-appointment-reason">Reason for visit</label>
+                  <textarea id="admin-appointment-reason" className="module-textarea-input" name="reason" rows={3} minLength={3} maxLength={1000} placeholder="Describe the reason for this appointment…" required />
+                </div>
+
+                {doctors.length === 0 && !doctorsLoading && <p className="module-subtitle" role="status">No active doctors are available. Register a doctor account before scheduling.</p>}
+                {appointmentError && <p className="module-subtitle" role="alert">{appointmentError}</p>}
+                <div className="modal-actions-bar">
+                  <Button type="button" variant="outline" onClick={() => setAdminAppointmentPatient(null)} disabled={appointmentSaving}>Cancel</Button>
+                  <Button type="submit" variant="primary" loading={appointmentSaving} disabled={doctorsLoading || doctors.length === 0}>Schedule Appointment</Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     );
   };

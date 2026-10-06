@@ -16,6 +16,7 @@ class DoctorOption(BaseModel):
 
 class AppointmentCreate(BaseModel):
     doctor_id: int
+    patient_id: Optional[int] = None
     appointment_date: date
     appointment_time: time
     reason: str = Field(min_length=3, max_length=1000)
