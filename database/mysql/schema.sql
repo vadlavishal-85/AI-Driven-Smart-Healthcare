@@ -1,5 +1,7 @@
--- AI-Driven Smart Healthcare Data Exchange and Analytics Ecosystem
--- MySQL Relational Schema
+-- LEGACY REFERENCE ONLY: this is an older MySQL schema example.
+-- Render currently uses PostgreSQL. This file is not executed by the app and
+-- does not match the deployed SQLAlchemy ORM schema. Do not use it to inspect
+-- or initialize the live Render database. See docs/BACKEND_OVERVIEW.md.
 -- Engine: InnoDB, Charset: utf8mb4
 
 CREATE DATABASE IF NOT EXISTS smarthealthcare

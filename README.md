@@ -24,6 +24,7 @@ A professional, real-world healthcare web application designed for managing and 
 - Render uses PostgreSQL through `DATABASE_URL`. Local development automatically creates a persistent SQLite database; set `APP_DATABASE_BACKEND=mysql` to use the legacy local MySQL configuration. MongoDB is optional because current API routes do not use it.
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for the Render deployment setup and current prerequisites.
+See [docs/BACKEND_OVERVIEW.md](docs/BACKEND_OVERVIEW.md) for the live backend architecture, database tables, API map, and faculty demonstration steps.
 
 ---
 

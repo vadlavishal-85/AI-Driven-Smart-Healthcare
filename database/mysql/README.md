@@ -1,15 +1,7 @@
-# MySQL Relational Database Architecture
+# Relational Database Notes
 
-## Purpose
-MySQL serves as the core relational database management system (RDBMS) for the **AI-Driven Smart Healthcare Platform**, ensuring ACID compliance, data integrity, and structured relational queries.
+The live Render deployment uses **PostgreSQL**, not this MySQL folder. Render provisions the managed database `smarthealthcare-db` in Singapore and passes its private connection URL to the API through `DATABASE_URL`.
 
-## Future Healthcare Data Domain
-In subsequent steps, MySQL will manage structured entity relationships including:
-- **User Management & Authentication**: Users, credentials, roles (Patients, Doctors, Administrators), and permission metadata.
-- **Provider Profiles**: Doctor specializations, departments, availability schedules, and hospital affiliations.
-- **Patient Demographics**: Patient profiles, basic identification, emergency contacts, and insurance details.
-- **Clinical Scheduling**: Appointment bookings, consultation slots, statuses, and cancellation logs.
-- **Transactional & Billing Records**: Invoices, payment records, and transaction audits.
+The Python database module remains named `backend/app/database/mysql.py` for compatibility. It supports PostgreSQL through `psycopg`, local SQLite for development, and optional legacy MySQL through PyMySQL.
 
----
-> **Note**: Actual database schemas, tables, migrations, and relationships will be created in a later step.
+The live tables come from the SQLAlchemy models in `backend/app/models/`, created at API startup. `schema.sql` in this directory is an older MySQL reference script, is not run by Render, and does not match the deployed ORM schema. See [the backend overview](../../docs/BACKEND_OVERVIEW.md) for the current tables and a safe read-only demonstration.

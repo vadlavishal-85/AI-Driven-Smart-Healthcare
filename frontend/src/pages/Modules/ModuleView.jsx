@@ -347,25 +347,55 @@ export default function ModuleView() {
 
   const pathname = location.pathname;
 
+  const renderPatientModuleNotice = (title, message, actionLabel = 'View Clinical Notes', actionPath = '/clinical-notes') => (
+    <div className="module-subsystem-wrapper animate-fade-up">
+      <div className="module-header-card">
+        <div className="module-header-info">
+          <div className="module-badge-row">
+            <Badge variant="primary" size="sm" dot>Patient workspace</Badge>
+          </div>
+          <h1 className="module-title">{title}</h1>
+          <p className="module-subtitle">{message}</p>
+        </div>
+      </div>
+      <Card>
+        <p className="module-subtitle" role="note">
+          This preview is not connected to patient-specific stored data. Sample information for other profiles is hidden from patient accounts.
+        </p>
+        <Button variant="primary" onClick={() => navigate(actionPath)}>{actionLabel}</Button>
+      </Card>
+    </div>
+  );
+
   // Render appropriate view based on current route
   const renderModuleContent = () => {
     switch (pathname) {
       case '/patients':
-        return renderPatientsView();
+        return isPatient
+          ? renderPatientModuleNotice('Patient Directory', 'The clinical staff directory is not available to patient accounts.', 'View Care Team', '/doctors')
+          : renderPatientsView();
       case '/doctors':
         return renderDoctorsView();
       case '/appointments':
         return renderAppointmentsView();
       case '/medical-records':
-        return renderMedicalRecordsView();
+        return isPatient
+          ? renderPatientModuleNotice('Medical Records', 'No patient-specific medical records are connected to this demo account yet.')
+          : renderMedicalRecordsView();
       case '/clinical-notes':
         return renderClinicalNotesView();
       case '/prescriptions':
-        return renderPrescriptionsView();
+        return isPatient
+          ? renderPatientModuleNotice('Prescriptions', 'No patient-specific prescriptions are connected to this demo account yet.', 'Open Appointments', '/appointments')
+          : renderPrescriptionsView();
       case '/data-exchange':
-        return renderDataExchangeView();
+        return isPatient
+          ? renderPatientModuleNotice('Data Exchange', 'Patient data-exchange events are not connected to this demo account yet.', 'Open Appointments', '/appointments')
+          : renderDataExchangeView();
       case '/analytics':
-        return renderAnalyticsView();
+        return isPatient
+          ? renderPatientModuleNotice('Analytics', 'System analytics are not available to patient accounts.', 'Return to Dashboard', '/dashboard')
+          : renderAnalyticsView();
       case '/settings':
         return renderSettingsView();
       default:

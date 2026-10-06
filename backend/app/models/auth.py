@@ -8,7 +8,7 @@ from app.database.mysql import Base
 
 
 # =====================================================================
-# SQLAlchemy ORM Models (Mapped to existing MySQL schema)
+# SQLAlchemy ORM models for the configured relational database
 # =====================================================================
 
 class Role(Base):
