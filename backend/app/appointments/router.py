@@ -1,9 +1,10 @@
-from datetime import date
+from datetime import date, datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import get_current_user
+from app.database.mongodb import get_clinical_database
 from app.database.mysql import get_db
 from app.models.appointments import Appointment, AppointmentStatus, DoctorProfile
 from app.models.auth import RoleEnum, User
@@ -28,8 +29,44 @@ def _doctor_name(user: User) -> str:
     return name if user.first_name.strip().lower() in {"dr", "dr."} else f"Dr. {name}"
 
 
-def _response(appointment: Appointment) -> AppointmentResponse:
+CLINICAL_FIELDS = ("diagnosis", "treatment_plan", "clinical_notes")
+
+
+def _legacy_clinical_data(appointment: Appointment) -> dict:
+    return {field: getattr(appointment, field) for field in CLINICAL_FIELDS}
+
+
+def _read_clinical_data(appointment: Appointment, mongo=None) -> dict:
+    legacy = _legacy_clinical_data(appointment)
+    if mongo is None:
+        return legacy
+    existing = mongo.clinical_records.find_one({"appointment_id": appointment.id})
+    if existing:
+        return {field: existing.get(field) for field in CLINICAL_FIELDS}
+    if any(value for value in legacy.values()):
+        now = datetime.now(timezone.utc)
+        migrated = {
+            "appointment_id": appointment.id,
+            "patient_id": appointment.patient_id,
+            "doctor_id": appointment.doctor_id,
+            **legacy,
+            "created_at": now,
+            "updated_at": now,
+            "migrated_from_relational": True,
+        }
+        mongo.clinical_records.update_one(
+            {"appointment_id": appointment.id},
+            {"$setOnInsert": migrated},
+            upsert=True,
+        )
+        stored = mongo.clinical_records.find_one({"appointment_id": appointment.id}) or migrated
+        return {field: stored.get(field) for field in CLINICAL_FIELDS}
+    return legacy
+
+
+def _response(appointment: Appointment, clinical_data: dict | None = None) -> AppointmentResponse:
     doctor_profile = appointment.doctor.doctor_profile
+    clinical_data = clinical_data if clinical_data is not None else _legacy_clinical_data(appointment)
     return AppointmentResponse(
         id=appointment.id,
         patient_id=appointment.patient_id,
@@ -42,9 +79,9 @@ def _response(appointment: Appointment) -> AppointmentResponse:
         appointment_time=appointment.appointment_time,
         reason=appointment.reason,
         status=appointment.status,
-        diagnosis=appointment.diagnosis,
-        treatment_plan=appointment.treatment_plan,
-        clinical_notes=appointment.clinical_notes,
+        diagnosis=clinical_data.get("diagnosis"),
+        treatment_plan=clinical_data.get("treatment_plan"),
+        clinical_notes=clinical_data.get("clinical_notes"),
         created_at=appointment.created_at,
         updated_at=appointment.updated_at,
     )
@@ -83,7 +120,11 @@ def list_appointments(
         query = query.filter(Appointment.doctor_id == current_user.id)
     elif role != RoleEnum.ADMIN.value:
         raise HTTPException(status_code=403, detail="Access forbidden.")
-    return [_response(appointment) for appointment in query.all()]
+    mongo = get_clinical_database(required=False)
+    return [
+        _response(appointment, _read_clinical_data(appointment, mongo))
+        for appointment in query.all()
+    ]
 
 
 @router.post("", response_model=AppointmentResponse, status_code=status.HTTP_201_CREATED)
@@ -274,8 +315,31 @@ def update_clinical_info(
     ).first()
     if not appointment:
         raise HTTPException(status_code=404, detail="Appointment not found.")
-    for field, value in request.model_dump(exclude_unset=True).items():
-        setattr(appointment, field, value.strip() if isinstance(value, str) else value)
-    db.commit()
-    db.refresh(appointment)
-    return _response(appointment)
+    changes = request.model_dump(exclude_unset=True)
+    if not changes:
+        raise HTTPException(status_code=422, detail="Provide at least one clinical field to save.")
+
+    mongo = get_clinical_database()
+    current = _read_clinical_data(appointment, mongo)
+    clinical_data = {
+        field: current.get(field)
+        for field in CLINICAL_FIELDS
+    }
+    for field, value in changes.items():
+        clinical_data[field] = value.strip() if isinstance(value, str) else value
+    now = datetime.now(timezone.utc)
+    mongo.clinical_records.update_one(
+        {"appointment_id": appointment.id},
+        {
+            "$set": {
+                "patient_id": appointment.patient_id,
+                "doctor_id": appointment.doctor_id,
+                **clinical_data,
+                "updated_by": current_user.id,
+                "updated_at": now,
+            },
+            "$setOnInsert": {"created_at": now},
+        },
+        upsert=True,
+    )
+    return _response(appointment, clinical_data)

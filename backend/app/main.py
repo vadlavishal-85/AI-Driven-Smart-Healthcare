@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
+from pymongo.errors import PyMongoError
 from sqlalchemy.exc import SQLAlchemyError
 from app.auth.router import router as auth_router
 from app.users.router import router as users_router
@@ -11,7 +12,8 @@ from app.appointments.router import router as appointments_router
 from app.admin.router import router as admin_router
 from app.patients.router import router as patients_router
 from app.prescription_notes.router import router as prescription_notes_router
-from app.database.mongodb import check_mongodb_connection
+from app.prescriptions.router import router as prescriptions_router
+from app.database.mongodb import MongoDBUnavailableError, check_mongodb_connection
 from app.database.mysql import (
     Base,
     DatabaseUnavailableError,
@@ -73,6 +75,19 @@ async def handle_unconfigured_database(_request, _exception):
         content={"detail": "Healthcare database is unavailable. Please try again later."},
     )
 
+
+@app.exception_handler(MongoDBUnavailableError)
+async def handle_unconfigured_mongodb(_request, exception):
+    return JSONResponse(status_code=503, content={"detail": str(exception)})
+
+
+@app.exception_handler(PyMongoError)
+async def handle_mongodb_error(_request, _exception):
+    return JSONResponse(
+        status_code=503,
+        content={"detail": "MongoDB clinical data store is unavailable. Please try again later."},
+    )
+
 # Include Authentication & Users Routers
 app.include_router(auth_router)
 app.include_router(users_router)
@@ -80,6 +95,7 @@ app.include_router(appointments_router)
 app.include_router(admin_router)
 app.include_router(patients_router)
 app.include_router(prescription_notes_router)
+app.include_router(prescriptions_router)
 
 
 @app.on_event("startup")
@@ -233,7 +249,8 @@ def database_health():
 
     return {
         "relational_database": "connected" if database_ok else "unavailable",
-        "mongodb": "connected" if mongo_ok else "optional / not configured",
+        "mongodb": "connected" if mongo_ok else ("not configured" if mongo_msg == "not configured" else "unavailable"),
+        "mongodb_required_for": ["clinical records", "prescriptions", "prescription notes", "health information exchange"],
     }
 
 

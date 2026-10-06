@@ -15,7 +15,7 @@ If Render reports that a service name is already taken, update both the correspo
 
 ## Database and privacy limits
 
-The Blueprint provisions PostgreSQL, so a separate MySQL or MongoDB service is not required for the implemented APIs. PostgreSQL is selected through `DATABASE_URL`; local MySQL remains supported with `APP_DATABASE_BACKEND=mysql`. Local development defaults to a persistent SQLite file so a fresh checkout works without a database server. MongoDB health is informational and optional because current API routes do not use MongoDB.
+The Blueprint provisions PostgreSQL for accounts and appointment scheduling. The API also requires a MongoDB Atlas database for clinical records, prescriptions, clinician notes, and health information exchange. Set `MONGODB_URI` on the `smarthealthcare-api` Render service and set `MONGODB_DATABASE` to `smarthealthcare` (or your chosen database). Keep the URI in Render's secret environment settings; do not commit it to source control. Without a reachable MongoDB URI, Mongo-backed workflows return `503` and `/database/health` reports MongoDB as unavailable. Local development defaults to a persistent SQLite file for relational records, while Mongo-backed workflows require the same `MONGODB_URI` setting.
 
 Render's free PostgreSQL database expires 30 days after creation, has no backups, and is documented for testing/hobby use rather than production. The free app services can spin down when idle. Do not store real patient information or clinical data in this demo deployment. For a durable live system, use a paid database plan with backups, access controls, and an appropriate healthcare privacy/compliance review before handling real patient data.
 
@@ -23,6 +23,6 @@ Render's free PostgreSQL database expires 30 days after creation, has no backups
 
 Patient registration, login, role checks, profile updates, and password changes use the database. Patients can create appointments for active, administrator-provisioned doctors, view only their own appointments, and cancel eligible bookings. Assigned doctors can view their own appointment schedule, confirm or close appointments, and write diagnosis, treatment plan, and clinical notes. Patients can read clinical information attached to their own appointments. Appointment booking checks for an already scheduled or confirmed appointment for the same doctor and time.
 
-Only appointment and account workflows are backed by the API. Other module pages such as medical-record search, prescriptions, analytics, and data exchange remain demonstration content; do not rely on them for real operations or clinical decisions.
+Account, appointment, clinical-note, prescription, and consent-logged health-information exchange workflows are connected to the API. Prescriptions and clinical records require a working MongoDB URI. The hospital exchange currently creates an audited FHIR JSON export for manual delivery; it does not transmit to an external hospital automatically. Analytics and settings still contain preview content and are labeled in the app.
 
 The GitHub repository contains the website source tree and Render Blueprint. Never commit `.env` files, database credentials, access tokens, or real patient information.
