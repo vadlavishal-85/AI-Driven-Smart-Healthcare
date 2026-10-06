@@ -1346,6 +1346,7 @@ export default function ModuleView() {
   // --------------------------------------------------------------------------
   const renderPrescriptionsView = () => {
     const eligibleAppointments = appointments.filter((appointment) => ['CONFIRMED', 'COMPLETED'].includes(appointment.status));
+    const prescriptionPageErrors = [...new Set([prescriptionError, prescriptionNotesError].filter(Boolean))];
     const savePrescriptionNote = async (prescriptionCode) => {
       const note = (prescriptionDrafts[prescriptionCode] || '').trim();
       if (!note) {
@@ -1402,10 +1403,12 @@ export default function ModuleView() {
           )}
         </div>
 
-        {prescriptionError && <p className="module-subtitle" role="alert">{prescriptionError}</p>}
-        {prescriptionNotesError && <p className="module-subtitle" role="alert">{prescriptionNotesError}</p>}
+        {prescriptionPageErrors.length > 0 && (
+          <div className="auth-alert auth-alert-danger" role="alert">
+            {prescriptionPageErrors.map((error) => <span key={error}>{error}</span>)}
+          </div>
+        )}
         {prescriptionSuccess && <p className="module-subtitle" role="status">{prescriptionSuccess}</p>}
-        {dataExchangeError && <p className="module-subtitle" role="alert">{dataExchangeError}</p>}
         {dataExchangeSuccess && <p className="module-subtitle" role="status">{dataExchangeSuccess}</p>}
         {prescriptionLoading && <Card>Loading prescriptions from MongoDB…</Card>}
         {isDoctor && !appointmentsLoading && !appointmentError && appointments.length === 0 && (
