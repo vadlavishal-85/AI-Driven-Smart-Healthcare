@@ -15,6 +15,7 @@ import {
   HeartPulse,
 } from 'lucide-react';
 import { useAuth } from '../../context/useAuth';
+import ThemeToggle from '../../components/ui/ThemeToggle';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import doctorRoleImg from '../../assets/images/doctor_role.jpg';
@@ -178,9 +179,11 @@ function LoginForm({ roleConfig, requiredRole }) {
             </span>
           </Link>
 
+          <ThemeToggle />
           <button
             type="button"
             className="sh-login-change-role-btn"
+            aria-label="Change Healthcare Role"
             onClick={() => navigate('/select-role')}
           >
             <ArrowLeft size={16} />

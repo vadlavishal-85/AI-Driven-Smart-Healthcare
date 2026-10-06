@@ -29,6 +29,14 @@ class AppointmentStatusUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class AppointmentDetailsUpdate(BaseModel):
+    appointment_date: Optional[date] = None
+    appointment_time: Optional[time] = None
+    reason: Optional[str] = Field(None, min_length=3, max_length=1000)
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class ClinicalInfoUpdate(BaseModel):
     diagnosis: Optional[str] = Field(None, max_length=500)
     treatment_plan: Optional[str] = Field(None, max_length=5000)

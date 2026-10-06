@@ -9,6 +9,7 @@ from app.models.appointments import Appointment, AppointmentStatus, DoctorProfil
 from app.models.auth import RoleEnum, User
 from app.appointments.schemas import (
     AppointmentCreate,
+    AppointmentDetailsUpdate,
     AppointmentResponse,
     AppointmentStatusUpdate,
     ClinicalInfoUpdate,
@@ -22,6 +23,11 @@ def _role(user: User) -> str:
     return user.role.name if user.role else ""
 
 
+def _doctor_name(user: User) -> str:
+    name = f"{user.first_name} {user.last_name}".strip()
+    return name if user.first_name.strip().lower() in {"dr", "dr."} else f"Dr. {name}"
+
+
 def _response(appointment: Appointment) -> AppointmentResponse:
     doctor_profile = appointment.doctor.doctor_profile
     return AppointmentResponse(
@@ -29,7 +35,7 @@ def _response(appointment: Appointment) -> AppointmentResponse:
         patient_id=appointment.patient_id,
         patient_name=f"{appointment.patient.first_name} {appointment.patient.last_name}",
         doctor_id=appointment.doctor_id,
-        doctor_name=f"{appointment.doctor.first_name} {appointment.doctor.last_name}",
+        doctor_name=_doctor_name(appointment.doctor),
         department=doctor_profile.department if doctor_profile else "General",
         specialty=doctor_profile.specialty if doctor_profile else "General Practice",
         appointment_date=appointment.appointment_date,
@@ -55,7 +61,7 @@ def list_bookable_doctors(
     return [
         DoctorOption(
             id=profile.user.id,
-            name=f"{profile.user.first_name} {profile.user.last_name}",
+            name=_doctor_name(profile.user),
             email=profile.user.email,
             department=profile.department,
             specialty=profile.specialty,
@@ -136,26 +142,103 @@ def update_appointment_status(
 
     role = _role(current_user)
     target_status = request.status
+    terminal_statuses = {
+        AppointmentStatus.COMPLETED,
+        AppointmentStatus.CANCELLED,
+        AppointmentStatus.NO_SHOW,
+    }
+    if appointment.status in terminal_statuses:
+        raise HTTPException(status_code=409, detail="This appointment is already closed.")
+
     if role == RoleEnum.PATIENT.value:
         if appointment.patient_id != current_user.id:
             raise HTTPException(status_code=404, detail="Appointment not found.")
         if target_status != AppointmentStatus.CANCELLED:
             raise HTTPException(status_code=403, detail="Patients may only cancel their own appointments.")
-        if appointment.status in {AppointmentStatus.COMPLETED, AppointmentStatus.CANCELLED, AppointmentStatus.NO_SHOW}:
-            raise HTTPException(status_code=409, detail="This appointment can no longer be cancelled.")
     elif role == RoleEnum.DOCTOR.value:
         if appointment.doctor_id != current_user.id:
             raise HTTPException(status_code=404, detail="Appointment not found.")
-        if target_status == AppointmentStatus.CANCELLED:
-            pass
-        elif target_status not in {AppointmentStatus.CONFIRMED, AppointmentStatus.COMPLETED, AppointmentStatus.NO_SHOW}:
-            raise HTTPException(status_code=422, detail="Doctors may confirm, complete, mark no-show, or cancel appointments.")
-        if appointment.status in {AppointmentStatus.COMPLETED, AppointmentStatus.CANCELLED, AppointmentStatus.NO_SHOW}:
-            raise HTTPException(status_code=409, detail="This appointment is already closed.")
     elif role != RoleEnum.ADMIN.value:
         raise HTTPException(status_code=403, detail="Access forbidden.")
 
+    allowed_targets = {
+        AppointmentStatus.SCHEDULED: {AppointmentStatus.CONFIRMED, AppointmentStatus.CANCELLED},
+        AppointmentStatus.CONFIRMED: {
+            AppointmentStatus.COMPLETED,
+            AppointmentStatus.NO_SHOW,
+            AppointmentStatus.CANCELLED,
+        },
+    }
+    if role == RoleEnum.PATIENT.value:
+        valid_transition = target_status == AppointmentStatus.CANCELLED
+    else:
+        valid_transition = target_status in allowed_targets.get(appointment.status, set())
+    if not valid_transition:
+        raise HTTPException(status_code=422, detail="That appointment status change is not allowed.")
+
     appointment.status = target_status
+    db.commit()
+    db.refresh(appointment)
+    return _response(appointment)
+
+
+@router.patch("/{appointment_id}", response_model=AppointmentResponse)
+def update_appointment_details(
+    appointment_id: int,
+    request: AppointmentDetailsUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update appointment date, time, or reason for an open appointment."""
+    # Null values should not overwrite required appointment fields or reach
+    # comparisons below as None; treat them as omitted and reject an empty patch.
+    changes = request.model_dump(exclude_unset=True, exclude_none=True)
+    if not changes:
+        raise HTTPException(status_code=422, detail="Provide at least one appointment field to update.")
+
+    appointment = db.query(Appointment).filter(Appointment.id == appointment_id).first()
+    if not appointment:
+        raise HTTPException(status_code=404, detail="Appointment not found.")
+
+    role = _role(current_user)
+    if role == RoleEnum.PATIENT.value:
+        if appointment.patient_id != current_user.id:
+            raise HTTPException(status_code=404, detail="Appointment not found.")
+        if appointment.status != AppointmentStatus.SCHEDULED:
+            raise HTTPException(status_code=409, detail="Patients can only edit appointments that are awaiting confirmation.")
+    elif role == RoleEnum.DOCTOR.value:
+        if appointment.doctor_id != current_user.id:
+            raise HTTPException(status_code=404, detail="Appointment not found.")
+        if appointment.status not in {AppointmentStatus.SCHEDULED, AppointmentStatus.CONFIRMED}:
+            raise HTTPException(status_code=409, detail="This appointment is already closed.")
+    elif role == RoleEnum.ADMIN.value:
+        if appointment.status not in {AppointmentStatus.SCHEDULED, AppointmentStatus.CONFIRMED}:
+            raise HTTPException(status_code=409, detail="This appointment is already closed.")
+    else:
+        raise HTTPException(status_code=403, detail="Access forbidden.")
+
+    appointment_date = changes.get("appointment_date", appointment.appointment_date)
+    appointment_time = changes.get("appointment_time", appointment.appointment_time)
+    if appointment_date < date.today():
+        raise HTTPException(status_code=422, detail="Appointment date must be today or later.")
+
+    schedule_changed = (
+        appointment_date != appointment.appointment_date
+        or appointment_time != appointment.appointment_time
+    )
+    if schedule_changed:
+        conflict = db.query(Appointment.id).filter(
+            Appointment.id != appointment.id,
+            Appointment.doctor_id == appointment.doctor_id,
+            Appointment.appointment_date == appointment_date,
+            Appointment.appointment_time == appointment_time,
+            Appointment.status.in_([AppointmentStatus.SCHEDULED, AppointmentStatus.CONFIRMED]),
+        ).first()
+        if conflict:
+            raise HTTPException(status_code=409, detail="That doctor already has an appointment at this time.")
+
+    for field, value in changes.items():
+        setattr(appointment, field, value.strip() if isinstance(value, str) else value)
     db.commit()
     db.refresh(appointment)
     return _response(appointment)

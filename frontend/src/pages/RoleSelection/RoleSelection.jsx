@@ -15,6 +15,7 @@ import doctorRoleImg from '../../assets/images/doctor_role.jpg';
 import patientRoleImg from '../../assets/images/patient_role.jpg';
 import adminRoleImg from '../../assets/images/admin_role.jpg';
 import './RoleSelection.css';
+import ThemeToggle from '../../components/ui/ThemeToggle';
 
 export default function RoleSelection() {
   const navigate = useNavigate();
@@ -90,10 +91,13 @@ export default function RoleSelection() {
             </span>
           </Link>
 
-          <Link to="/" className="role-back-home-link">
-            <ArrowLeft size={16} />
-            <span>Back to Hospital Overview</span>
-          </Link>
+          <div className="role-header-actions">
+            <ThemeToggle />
+            <Link to="/" className="role-back-home-link">
+              <ArrowLeft size={16} />
+              <span>Back to Hospital Overview</span>
+            </Link>
+          </div>
         </div>
       </header>
 

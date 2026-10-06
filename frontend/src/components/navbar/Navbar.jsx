@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Activity, Menu, X, ArrowRight } from 'lucide-react';
 import Button from '../ui/Button';
+import ThemeToggle from '../ui/ThemeToggle';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -57,6 +58,8 @@ export default function Navbar() {
             Get Started
           </Button>
         </div>
+
+        <ThemeToggle />
 
         {/* Mobile Hamburger Toggle */}
         <button

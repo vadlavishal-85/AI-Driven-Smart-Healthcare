@@ -14,7 +14,6 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronDown,
   Settings,
   Pill,
   ShieldCheck,
@@ -22,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/useAuth';
 import Button from '../ui/Button';
+import ThemeToggle from '../ui/ThemeToggle';
 import './TopNavbar.css';
 
 // Dynamic role-based navigation configuration
@@ -79,7 +79,6 @@ function getRoleAtmosphereBadge(role) {
 export default function TopNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -96,9 +95,6 @@ export default function TopNavbar() {
   // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (!e.target.closest('.sh-profile-wrapper')) {
-        setProfileOpen(false);
-      }
       if (!e.target.closest('.sh-notif-wrapper')) {
         setNotifOpen(false);
       }
@@ -108,14 +104,10 @@ export default function TopNavbar() {
   }, []);
 
   const handleLogout = () => {
-    setProfileOpen(false);
+    setMobileOpen(false);
     logout();
     navigate('/select-role');
   };
-
-  const userInitials = currentUser
-    ? `${currentUser.first_name?.[0] || ''}${currentUser.last_name?.[0] || ''}`.toUpperCase() || 'SH'
-    : 'SH';
 
   const roleFormatted = formatRole(currentUser?.role);
   const currentNavItems = getNavItemsForRole(currentUser?.role);
@@ -150,6 +142,8 @@ export default function TopNavbar() {
                 <NavLink
                   key={item.path}
                   to={item.path}
+                  aria-label={item.name}
+                  title={item.name}
                   className={({ isActive }) =>
                     `sh-nav-pill ${isActive ? 'sh-nav-pill-active' : ''}`
                   }
@@ -167,11 +161,12 @@ export default function TopNavbar() {
         {/* Right Actions */}
         <div className="sh-topbar-right">
           {isAuthenticated ? (
-            <div className="sh-topbar-workspace-actions desktop-only">
-              <div className="sh-status-pill-wrap">
-                <span className="pulse-dot-green" />
-                <span className="sh-status-text">Connected Node</span>
-              </div>
+            <>
+              <div className="sh-topbar-workspace-actions desktop-only">
+                <div className="sh-status-pill-wrap">
+                  <span className="pulse-dot-green" />
+                  <span className="sh-status-text">Connected Node</span>
+                </div>
 
               {/* Notification Trigger */}
               <div className="sh-notif-wrapper">
@@ -210,58 +205,30 @@ export default function TopNavbar() {
                 )}
               </div>
 
-              {/* Profile Dropdown */}
-              <div className="sh-profile-wrapper">
+              </div>
+
+              <div className="sh-topbar-account-actions" aria-label="Account actions">
+                <Link
+                  to="/profile"
+                  className="sh-topbar-account-action"
+                  aria-label="Account Profile"
+                  title="Account Profile"
+                >
+                  <User size={16} />
+                  <span>Profile</span>
+                </Link>
                 <button
                   type="button"
-                  className="sh-profile-btn"
-                  onClick={() => setProfileOpen(!profileOpen)}
-                  aria-label="User profile menu"
+                  className="sh-topbar-account-action sh-topbar-signout"
+                  aria-label="Sign Out"
+                  title="Sign Out"
+                  onClick={handleLogout}
                 >
-                  <div className="sh-avatar-circle">
-                    <span>{userInitials}</span>
-                  </div>
-                  <div className="sh-profile-info">
-                    <span className="sh-profile-name">
-                      {currentUser?.first_name} {currentUser?.last_name}
-                    </span>
-                    <span className="sh-profile-role">{roleFormatted}</span>
-                  </div>
-                  <ChevronDown size={14} className="text-muted" />
+                  <LogOut size={16} />
+                  <span>Sign Out</span>
                 </button>
-
-                {profileOpen && (
-                  <div className="sh-profile-menu animate-fade-in">
-                    <div className="sh-profile-menu-header">
-                      <strong>
-                        {currentUser?.first_name} {currentUser?.last_name}
-                      </strong>
-                      <span className="sh-profile-menu-email">{currentUser?.email}</span>
-                      <span className={`sh-profile-menu-role-badge theme-${atmosphere.theme}`}>
-                        {roleFormatted}
-                      </span>
-                    </div>
-                    <div className="sh-profile-menu-divider" />
-                    <Link
-                      to="/profile"
-                      className="sh-profile-menu-item"
-                      onClick={() => setProfileOpen(false)}
-                    >
-                      <User size={15} />
-                      <span>Account Profile</span>
-                    </Link>
-                    <button
-                      type="button"
-                      className="sh-profile-menu-item text-danger"
-                      onClick={handleLogout}
-                    >
-                      <LogOut size={15} />
-                      <span>Sign Out</span>
-                    </button>
-                  </div>
-                )}
               </div>
-            </div>
+            </>
           ) : (
             <div className="desktop-only">
               <Button
@@ -274,30 +241,7 @@ export default function TopNavbar() {
             </div>
           )}
 
-          {isAuthenticated && (
-            <div className="sh-topbar-mobile-account mobile-only" aria-label="Account actions">
-              <Link
-                to="/profile"
-                className="sh-topbar-mobile-action"
-                aria-label="Account Profile"
-                title="Account Profile"
-                onClick={() => setMobileOpen(false)}
-              >
-                <User size={16} />
-                <span>Profile</span>
-              </Link>
-              <button
-                type="button"
-                className="sh-topbar-mobile-action"
-                aria-label="Sign Out"
-                title="Sign Out"
-                onClick={handleLogout}
-              >
-                <LogOut size={16} />
-                <span>Sign Out</span>
-              </button>
-            </div>
-          )}
+          <ThemeToggle />
 
           {/* Mobile Toggle */}
           <button

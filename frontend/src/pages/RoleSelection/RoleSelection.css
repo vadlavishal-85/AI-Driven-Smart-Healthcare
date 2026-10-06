@@ -29,6 +29,12 @@
   justify-content: space-between;
 }
 
+.role-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .role-brand-link {
   display: flex;
   align-items: center;
@@ -374,6 +380,18 @@
 }
 
 @media (max-width: 640px) {
+  .role-selection-header {
+    padding: 0.75rem 0;
+  }
+  .role-header-actions {
+    gap: 0.4rem;
+  }
+  .role-back-home-link {
+    padding: 0.5rem;
+  }
+  .role-back-home-link span {
+    display: none;
+  }
   .role-main-heading {
     font-size: 2rem;
   }

@@ -244,6 +244,16 @@
   color: var(--text-muted);
 }
 
+.patient-card-body .patient-field-row {
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.patient-card-body .field-val {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
 /* 2. DOCTORS GRID */
 .doctors-cards-grid {
   display: grid;
@@ -699,6 +709,15 @@
   display: flex;
   flex-direction: column;
   transition: var(--transition);
+}
+
+.rx-notes-field {
+  margin-top: 1rem;
+}
+
+.rx-note-privacy-hint {
+  color: var(--text-muted);
+  font-size: 0.75rem;
 }
 
 .prescription-card-item:hover {

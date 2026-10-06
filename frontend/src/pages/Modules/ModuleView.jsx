@@ -9,19 +9,17 @@ import {
   ArrowLeftRight,
   ShieldCheck,
   ArrowRight,
-  Zap,
   CheckCircle2,
   Search,
   MapPin,
   Mail,
   Lock,
-  HeartPulse,
-  Activity,
   Download,
   PlusCircle,
   X,
   FileCode,
   Pill,
+  Trash2,
 } from 'lucide-react';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import Card from '../../components/ui/Card';
@@ -51,73 +49,6 @@ function toCsvCell(value) {
 // ============================================================================
 // Sample content used only by the preview-only modules below.
 // ============================================================================
-
-const PATIENTS_DATA = [
-  {
-    id: 'PAT-8801',
-    name: 'John Doe',
-    age: 45,
-    gender: 'Male',
-    bloodGroup: 'O+',
-    phone: '+1 (555) 234-5678',
-    email: 'john.doe@smarthealth.org',
-    condition: 'Stage II Essential Hypertension',
-    doctor: 'Dr. Robert Chen',
-    department: 'Cardiology',
-    status: 'Active Inpatient',
-    room: 'Ward 3B - Bed 12',
-    admissionDate: 'Oct 02, 2026',
-    vitals: { bp: '138/86 mmHg', hr: '72 bpm', spo2: '99%' },
-  },
-  {
-    id: 'PAT-8802',
-    name: 'Emily Davis',
-    age: 34,
-    gender: 'Female',
-    bloodGroup: 'A+',
-    phone: '+1 (555) 876-5432',
-    email: 'emily.davis@smarthealth.org',
-    condition: 'Intractable Migraine with Visual Aura',
-    doctor: 'Dr. Sarah Patel',
-    department: 'Neurology',
-    status: 'Stable Outpatient',
-    room: 'Outpatient Clinic',
-    admissionDate: 'Oct 04, 2026',
-    vitals: { bp: '118/76 mmHg', hr: '68 bpm', spo2: '98%' },
-  },
-  {
-    id: 'PAT-8803',
-    name: 'Michael Scott',
-    age: 52,
-    gender: 'Male',
-    bloodGroup: 'B+',
-    phone: '+1 (555) 432-1098',
-    email: 'michael.scott@smarthealth.org',
-    condition: 'Type 2 Diabetes Mellitus & Neuropathy',
-    doctor: 'Dr. Robert Chen',
-    department: 'Cardiology',
-    status: 'Scheduled Review',
-    room: 'Room 402 Consult',
-    admissionDate: 'Sep 28, 2026',
-    vitals: { bp: '132/84 mmHg', hr: '76 bpm', spo2: '97%' },
-  },
-  {
-    id: 'PAT-8804',
-    name: 'Sophia Williams',
-    age: 29,
-    gender: 'Female',
-    bloodGroup: 'O-',
-    phone: '+1 (555) 654-3210',
-    email: 'sophia.williams@smarthealth.org',
-    condition: 'Acute Bronchial Asthma Exacerbation',
-    doctor: 'Dr. Elena Rostova',
-    department: 'Pulmonology',
-    status: 'Active Inpatient',
-    room: 'ICU Stepdown - Bed 4',
-    admissionDate: 'Oct 05, 2026',
-    vitals: { bp: '122/80 mmHg', hr: '84 bpm', spo2: '95%' },
-  },
-];
 
 const RECORDS_DATA = [
   {
@@ -298,17 +229,29 @@ export default function ModuleView() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState('ALL');
   const [selectedTx, setSelectedTx] = useState(null);
   const [newModalOpen, setNewModalOpen] = useState(false);
   const [appointments, setAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [patientsLoading, setPatientsLoading] = useState(false);
+  const [patientsError, setPatientsError] = useState('');
+  const [patientsSuccess, setPatientsSuccess] = useState('');
+  const [patientActionId, setPatientActionId] = useState(null);
+  const [prescriptionNotes, setPrescriptionNotes] = useState({});
+  const [prescriptionDrafts, setPrescriptionDrafts] = useState({});
+  const [prescriptionLoading, setPrescriptionLoading] = useState(false);
+  const [prescriptionSaving, setPrescriptionSaving] = useState(false);
+  const [prescriptionError, setPrescriptionError] = useState('');
+  const [prescriptionSuccess, setPrescriptionSuccess] = useState('');
   const [appointmentsLoading, setAppointmentsLoading] = useState(false);
   const [appointmentError, setAppointmentError] = useState('');
   const [appointmentSuccess, setAppointmentSuccess] = useState('');
   const [appointmentSaving, setAppointmentSaving] = useState(false);
   const [editingClinicalId, setEditingClinicalId] = useState(null);
   const [clinicalDrafts, setClinicalDrafts] = useState({});
+  const [editingAppointmentId, setEditingAppointmentId] = useState(null);
+  const [appointmentDrafts, setAppointmentDrafts] = useState({});
   const [minimumAppointmentDate] = useState(() => {
     const today = new Date();
     today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
@@ -316,6 +259,7 @@ export default function ModuleView() {
   });
   const isPatient = currentUser?.role === 'PATIENT';
   const isDoctor = currentUser?.role === 'DOCTOR';
+  const isAdmin = currentUser?.role === 'ADMIN';
   const requestedDoctorId = new URLSearchParams(location.search).get('doctorId') || '';
 
   const loadAppointments = useCallback(async () => {
@@ -335,15 +279,65 @@ export default function ModuleView() {
     }
   }, []);
 
+  const loadPatients = useCallback(async () => {
+    setPatientsLoading(true);
+    setPatientsError('');
+    try {
+      setPatients(await apiFetch('/patients'));
+    } catch (error) {
+      setPatientsError(error.message || 'Unable to load patient accounts.');
+    } finally {
+      setPatientsLoading(false);
+    }
+  }, []);
+
+  const loadPrescriptionNotes = useCallback(async () => {
+    setPrescriptionLoading(true);
+    setPrescriptionError('');
+    try {
+      const savedNotes = await apiFetch('/prescription-notes');
+      const notesByCode = Object.fromEntries(savedNotes.map(({ prescription_code: code, note }) => [code, note]));
+      setPrescriptionNotes(notesByCode);
+      setPrescriptionDrafts(notesByCode);
+    } catch (error) {
+      setPrescriptionError(error.message || 'Unable to load prescription notes.');
+    } finally {
+      setPrescriptionLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (['/appointments', '/doctors', '/clinical-notes'].includes(location.pathname)) {
       void Promise.resolve().then(loadAppointments);
+    }
+    if (location.pathname === '/patients') {
+      void Promise.resolve().then(loadPatients);
+    }
+    if (location.pathname === '/prescriptions' && !isPatient) {
+      void Promise.resolve().then(loadPrescriptionNotes);
     }
     if (location.pathname === '/appointments' && requestedDoctorId && isPatient) {
       const timer = window.setTimeout(() => setNewModalOpen(true), 0);
       return () => window.clearTimeout(timer);
     }
-  }, [location.pathname, location.search, requestedDoctorId, isPatient, loadAppointments]);
+  }, [location.pathname, location.search, requestedDoctorId, isPatient, loadAppointments, loadPatients, loadPrescriptionNotes]);
+
+  const deactivatePatient = async (patient) => {
+    const patientName = `${patient.first_name} ${patient.last_name}`.trim();
+    if (!window.confirm(`Deactivate ${patientName}'s account? They will lose sign-in access; appointments and clinical history will be retained.`)) return;
+    setPatientsError('');
+    setPatientsSuccess('');
+    setPatientActionId(patient.id);
+    try {
+      const result = await apiFetch(`/patients/${patient.id}`, { method: 'DELETE' });
+      setPatients((items) => items.filter((item) => item.id !== patient.id));
+      setPatientsSuccess(result.message || `${patientName}'s account was deactivated.`);
+    } catch (error) {
+      setPatientsError(error.message || 'Unable to remove this patient.');
+    } finally {
+      setPatientActionId(null);
+    }
+  };
 
   const pathname = location.pathname;
 
@@ -407,30 +401,27 @@ export default function ModuleView() {
   // 1. PATIENTS WORKSPACE
   // --------------------------------------------------------------------------
   const renderPatientsView = () => {
-    const filtered = PATIENTS_DATA.filter((p) => {
-      const matchesSearch =
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.condition.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.doctor.toLowerCase().includes(searchQuery.toLowerCase());
-      if (filterStatus === 'ALL') return matchesSearch;
-      return matchesSearch && p.status.toUpperCase().includes(filterStatus);
-    });
+    const normalizedSearch = searchQuery.trim().toLowerCase();
+    const filtered = patients.filter((patient) => (
+      `${patient.first_name} ${patient.last_name}`.toLowerCase().includes(normalizedSearch)
+      || patient.email.toLowerCase().includes(normalizedSearch)
+      || String(patient.id).includes(normalizedSearch)
+      || (patient.phone || '').toLowerCase().includes(normalizedSearch)
+    ));
 
     return (
       <div className="module-subsystem-wrapper animate-fade-up">
-        {/* Module Header */}
         <div className="module-header-card">
           <div className="module-header-info">
             <div className="module-badge-row">
-              <Badge variant="primary" size="sm" dot>
-                MySQL 8.4 Relational Storage
-              </Badge>
-              <span className="module-entity-count">{filtered.length} Active Records</span>
+              <Badge variant="primary" size="sm" dot>Connected Patient Accounts</Badge>
+              <span className="module-entity-count">{patients.length} Active Accounts</span>
             </div>
-            <h1 className="module-title">Patient Clinical Registry</h1>
+            <h1 className="module-title">Patient Accounts</h1>
             <p className="module-subtitle">
-              Comprehensive patient health charts, demographics, attending physicians, and real-time vital telemetry.
+              {isDoctor
+                ? 'Review patient accounts connected to appointments assigned to you.'
+                : 'Review active patient accounts and remove access when required. Deactivated accounts keep their appointment history.'}
             </p>
           </div>
 
@@ -440,122 +431,86 @@ export default function ModuleView() {
               size="sm"
               onClick={() => {
                 const columns = [
-                  ['id', 'ID'], ['name', 'Name'], ['age', 'Age'], ['gender', 'Gender'],
-                  ['bloodGroup', 'Blood group'], ['phone', 'Phone'], ['email', 'Email'],
-                  ['condition', 'Condition'], ['doctor', 'Doctor'], ['department', 'Department'],
-                  ['status', 'Status'], ['room', 'Location'], ['admissionDate', 'Admission date'],
+                  ['id', 'Account ID'], ['name', 'Name'], ['email', 'Email'], ['phone', 'Phone'],
+                  ['appointment_count', 'Appointments'], ['created_at', 'Registered'],
                 ];
                 const rows = [
                   columns.map(([, label]) => label),
-                  ...filtered.map((patient) => columns.map(([key]) => patient[key])),
+                  ...filtered.map((patient) => columns.map(([key]) => (
+                    key === 'name' ? `${patient.first_name} ${patient.last_name}` : patient[key]
+                  ))),
                 ];
                 const csv = rows.map((row) => row.map(toCsvCell).join(',')).join('\r\n');
-                downloadTextFile('sample-patient-registry.csv', `\uFEFF${csv}`, 'text/csv;charset=utf-8');
+                downloadTextFile('patient-accounts.csv', `\uFEFF${csv}`, 'text/csv;charset=utf-8');
               }}
+              disabled={filtered.length === 0}
             >
-              <Download size={14} /> Export Registry CSV
+              <Download size={14} /> Export Patient Accounts
             </Button>
           </div>
         </div>
 
-        {/* Search & Filter Bar */}
+        {patientsError && <p className="module-subtitle" role="alert">{patientsError}</p>}
+        {patientsSuccess && <p className="module-subtitle" role="status">{patientsSuccess}</p>}
+
         <div className="module-filter-bar">
           <div className="module-search-wrap">
             <Search size={18} className="module-search-icon" />
             <input
               type="text"
-              placeholder="Search by Patient Name, MRN ID, Diagnosis, or Attending Physician..."
+              placeholder="Search by patient name, email, phone, or account ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="module-search-input"
+              aria-label="Search patient accounts"
             />
-          </div>
-
-          <div className="module-filter-pills">
-            <button
-              type="button"
-              className={`filter-pill ${filterStatus === 'ALL' ? 'active' : ''}`}
-              onClick={() => setFilterStatus('ALL')}
-            >
-              All Census
-            </button>
-            <button
-              type="button"
-              className={`filter-pill ${filterStatus === 'INPATIENT' ? 'active' : ''}`}
-              onClick={() => setFilterStatus('INPATIENT')}
-            >
-              Active Inpatients
-            </button>
-            <button
-              type="button"
-              className={`filter-pill ${filterStatus === 'OUTPATIENT' ? 'active' : ''}`}
-              onClick={() => setFilterStatus('OUTPATIENT')}
-            >
-              Outpatients
-            </button>
           </div>
         </div>
 
-        {/* Patients Grid */}
         <div className="patients-cards-grid">
+          {patientsLoading && <Card>Loading active patient accounts…</Card>}
+          {!patientsLoading && !patientsError && filtered.length === 0 && (
+            <Card>{patients.length ? 'No patient accounts match your search.' : 'No active patient accounts are available.'}</Card>
+          )}
           {filtered.map((patient) => (
             <Card key={patient.id} className="patient-record-card" hoverable>
               <div className="patient-card-header">
                 <div className="patient-identity-block">
                   <div className="patient-avatar-box">
-                    <span>{patient.name.split(' ').map((n) => n[0]).join('')}</span>
+                    <span>{`${patient.first_name[0] || ''}${patient.last_name[0] || ''}`.toUpperCase()}</span>
                   </div>
                   <div>
-                    <h3 className="patient-name">{patient.name}</h3>
-                    <span className="patient-mrn">{patient.id} • {patient.gender}, Age {patient.age}</span>
+                    <h3 className="patient-name">{patient.first_name} {patient.last_name}</h3>
+                    <span className="patient-mrn">Patient account #{patient.id}</span>
                   </div>
                 </div>
-                <Badge
-                  variant={patient.status.includes('Inpatient') ? 'primary' : 'success'}
-                  size="sm"
-                >
-                  {patient.status}
-                </Badge>
+                <Badge variant="success" size="sm">Active</Badge>
               </div>
 
               <div className="patient-card-body">
                 <div className="patient-field-row">
-                  <span className="field-lbl">Clinical Condition:</span>
-                  <span className="field-val font-semibold text-primary">{patient.condition}</span>
+                  <span className="field-lbl">Email:</span>
+                  <span className="field-val">{patient.email}</span>
                 </div>
                 <div className="patient-field-row">
-                  <span className="field-lbl">Attending Doctor:</span>
-                  <span className="field-val">{patient.doctor} ({patient.department})</span>
+                  <span className="field-lbl">Phone:</span>
+                  <span className="field-val">{patient.phone || 'Not provided'}</span>
                 </div>
                 <div className="patient-field-row">
-                  <span className="field-lbl">Location / Bed:</span>
-                  <span className="field-val">{patient.room}</span>
-                </div>
-
-                <div className="patient-vitals-strip">
-                  <div className="vital-pill">
-                    <HeartPulse size={13} className="text-teal" />
-                    <span>BP: {patient.vitals.bp}</span>
-                  </div>
-                  <div className="vital-pill">
-                    <Activity size={13} className="text-success" />
-                    <span>HR: {patient.vitals.hr}</span>
-                  </div>
-                  <div className="vital-pill">
-                    <Zap size={13} className="text-cyan" />
-                    <span>SpO2: {patient.vitals.spo2}</span>
-                  </div>
+                  <span className="field-lbl">Appointments:</span>
+                  <span className="field-val">{patient.appointment_count}</span>
                 </div>
               </div>
 
               <div className="patient-card-footer">
-                <span className="admit-date">Admitted: {patient.admissionDate}</span>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigate('/medical-records')}
+                  className="text-danger"
+                  loading={patientActionId === patient.id}
+                  onClick={() => deactivatePatient(patient)}
                 >
-                  View EMR Chart →
+                  <Trash2 size={14} /> Remove Patient
                 </Button>
               </div>
             </Card>
@@ -640,6 +595,7 @@ export default function ModuleView() {
     });
 
     const updateStatus = async (appointment, status) => {
+      if (status === 'CANCELLED' && !window.confirm('Cancel this appointment?')) return;
       setAppointmentError('');
       setAppointmentSuccess('');
       setAppointmentSaving(true);
@@ -652,6 +608,30 @@ export default function ModuleView() {
         setAppointmentSuccess(`Appointment ${labelStatus(status).toLowerCase()}.`);
       } catch (error) {
         setAppointmentError(error.message || 'Unable to update appointment status.');
+      } finally {
+        setAppointmentSaving(false);
+      }
+    };
+
+    const saveAppointmentDetails = async (appointment) => {
+      const draft = appointmentDrafts[appointment.id] || {};
+      setAppointmentError('');
+      setAppointmentSuccess('');
+      setAppointmentSaving(true);
+      try {
+        const updated = await apiFetch(`/appointments/${appointment.id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            appointment_date: draft.appointment_date,
+            appointment_time: draft.appointment_time,
+            reason: draft.reason?.trim(),
+          }),
+        });
+        setAppointments((items) => items.map((item) => item.id === updated.id ? updated : item));
+        setEditingAppointmentId(null);
+        setAppointmentSuccess('Appointment details updated.');
+      } catch (error) {
+        setAppointmentError(error.message || 'Unable to update appointment details.');
       } finally {
         setAppointmentSaving(false);
       }
@@ -725,6 +705,7 @@ export default function ModuleView() {
           {!appointmentsLoading && appointments.map((apt) => {
             const isClosed = ['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(apt.status);
             const draft = clinicalDrafts[apt.id] || {};
+            const appointmentDraft = appointmentDrafts[apt.id] || {};
             const setDraftField = (field, value) => setClinicalDrafts((current) => ({
               ...current,
               [apt.id]: { ...current[apt.id], [field]: value },
@@ -763,6 +744,59 @@ export default function ModuleView() {
                     </div>
                   )}
 
+                  {editingAppointmentId === apt.id && (
+                    <div className="modal-form-body" aria-label={`Update appointment ${apt.id}`}>
+                      <div className="form-row-2">
+                        <div className="form-group-field">
+                          <label className="form-lbl" htmlFor={`appointment-update-date-${apt.id}`}>Date</label>
+                          <input
+                            id={`appointment-update-date-${apt.id}`}
+                            className="module-text-input"
+                            type="date"
+                            min={minDate}
+                            value={appointmentDraft.appointment_date ?? apt.appointment_date}
+                            onChange={(event) => setAppointmentDrafts((items) => ({
+                              ...items,
+                              [apt.id]: { ...items[apt.id], appointment_date: event.target.value },
+                            }))}
+                          />
+                        </div>
+                        <div className="form-group-field">
+                          <label className="form-lbl" htmlFor={`appointment-update-time-${apt.id}`}>Time</label>
+                          <input
+                            id={`appointment-update-time-${apt.id}`}
+                            className="module-text-input"
+                            type="time"
+                            value={appointmentDraft.appointment_time ?? apt.appointment_time.slice(0, 5)}
+                            onChange={(event) => setAppointmentDrafts((items) => ({
+                              ...items,
+                              [apt.id]: { ...items[apt.id], appointment_time: event.target.value },
+                            }))}
+                          />
+                        </div>
+                      </div>
+                      <div className="form-group-field">
+                        <label className="form-lbl" htmlFor={`appointment-update-reason-${apt.id}`}>Reason</label>
+                        <textarea
+                          id={`appointment-update-reason-${apt.id}`}
+                          className="module-textarea-input"
+                          rows={2}
+                          minLength={3}
+                          maxLength={1000}
+                          value={appointmentDraft.reason ?? apt.reason}
+                          onChange={(event) => setAppointmentDrafts((items) => ({
+                            ...items,
+                            [apt.id]: { ...items[apt.id], reason: event.target.value },
+                          }))}
+                        />
+                      </div>
+                      <div className="apt-actions-col">
+                        <Button variant="primary" size="sm" onClick={() => saveAppointmentDetails(apt)} loading={appointmentSaving}>Save Appointment</Button>
+                        <Button variant="ghost" size="sm" onClick={() => setEditingAppointmentId(null)}>Discard</Button>
+                      </div>
+                    </div>
+                  )}
+
                   {isDoctor && editingClinicalId === apt.id && (
                     <div className="modal-form-body">
                       <div className="form-group-field">
@@ -787,13 +821,56 @@ export default function ModuleView() {
 
                 <div className="apt-actions-col">
                   {isPatient && !isClosed && (
-                    <Button variant="outline" size="sm" onClick={() => updateStatus(apt, 'CANCELLED')} loading={appointmentSaving}>Cancel</Button>
+                    <>
+                      {apt.status === 'SCHEDULED' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setAppointmentDrafts((items) => ({
+                              ...items,
+                              [apt.id]: {
+                                appointment_date: apt.appointment_date,
+                                appointment_time: apt.appointment_time.slice(0, 5),
+                                reason: apt.reason,
+                              },
+                            }));
+                            setEditingAppointmentId(editingAppointmentId === apt.id ? null : apt.id);
+                          }}
+                        >
+                          {editingAppointmentId === apt.id ? 'Close Editor' : 'Update Appointment'}
+                        </Button>
+                      )}
+                      <Button variant="outline" size="sm" onClick={() => updateStatus(apt, 'CANCELLED')} loading={appointmentSaving}>Cancel</Button>
+                    </>
+                  )}
+                  {(isDoctor || isAdmin) && !isClosed && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setAppointmentDrafts((items) => ({
+                            ...items,
+                            [apt.id]: {
+                              appointment_date: apt.appointment_date,
+                              appointment_time: apt.appointment_time.slice(0, 5),
+                              reason: apt.reason,
+                            },
+                          }));
+                          setEditingAppointmentId(editingAppointmentId === apt.id ? null : apt.id);
+                        }}
+                      >
+                        {editingAppointmentId === apt.id ? 'Close Editor' : 'Update Appointment'}
+                      </Button>
+                      {apt.status === 'SCHEDULED' && <Button variant="primary" size="sm" onClick={() => updateStatus(apt, 'CONFIRMED')} loading={appointmentSaving}>Accept Appointment</Button>}
+                      {apt.status === 'CONFIRMED' && <Button variant="primary" size="sm" onClick={() => updateStatus(apt, 'COMPLETED')} loading={appointmentSaving}>Complete</Button>}
+                      {apt.status === 'CONFIRMED' && <Button variant="outline" size="sm" onClick={() => updateStatus(apt, 'NO_SHOW')} loading={appointmentSaving}>No-show</Button>}
+                      <Button variant="outline" size="sm" onClick={() => updateStatus(apt, 'CANCELLED')} loading={appointmentSaving}>Cancel Appointment</Button>
+                    </>
                   )}
                   {isDoctor && !isClosed && (
                     <>
-                      {apt.status === 'SCHEDULED' && <Button variant="primary" size="sm" onClick={() => updateStatus(apt, 'CONFIRMED')} loading={appointmentSaving}>Confirm</Button>}
-                      {apt.status === 'CONFIRMED' && <Button variant="primary" size="sm" onClick={() => updateStatus(apt, 'COMPLETED')} loading={appointmentSaving}>Complete</Button>}
-                      {apt.status === 'CONFIRMED' && <Button variant="outline" size="sm" onClick={() => updateStatus(apt, 'NO_SHOW')} loading={appointmentSaving}>No-show</Button>}
                       <Button variant="outline" size="sm" onClick={() => { setClinicalDrafts((current) => ({ ...current, [apt.id]: { diagnosis: apt.diagnosis || '', treatment_plan: apt.treatment_plan || '', clinical_notes: apt.clinical_notes || '' } })); setEditingClinicalId(editingClinicalId === apt.id ? null : apt.id); }}>
                         {editingClinicalId === apt.id ? 'Close Clinical Editor' : 'Update Clinical Info'}
                       </Button>
@@ -1059,6 +1136,31 @@ export default function ModuleView() {
   // 6. PRESCRIPTIONS
   // --------------------------------------------------------------------------
   const renderPrescriptionsView = () => {
+    const savePrescriptionNote = async (prescriptionCode) => {
+      const note = (prescriptionDrafts[prescriptionCode] || '').trim();
+      if (!note) {
+        setPrescriptionError('Enter a note before saving.');
+        setPrescriptionSuccess('');
+        return;
+      }
+      setPrescriptionError('');
+      setPrescriptionSuccess('');
+      setPrescriptionSaving(true);
+      try {
+        const saved = await apiFetch(`/prescription-notes/${prescriptionCode}`, {
+          method: 'PUT',
+          body: JSON.stringify({ note }),
+        });
+        setPrescriptionNotes((items) => ({ ...items, [prescriptionCode]: saved.note }));
+        setPrescriptionDrafts((items) => ({ ...items, [prescriptionCode]: saved.note }));
+        setPrescriptionSuccess(`Notes saved for ${prescriptionCode}.`);
+      } catch (error) {
+        setPrescriptionError(error.message || 'Unable to save prescription notes.');
+      } finally {
+        setPrescriptionSaving(false);
+      }
+    };
+
     return (
       <div className="module-subsystem-wrapper animate-fade-up">
         <div className="module-header-card">
@@ -1071,10 +1173,14 @@ export default function ModuleView() {
             </div>
             <h1 className="module-title">e-Prescriptions & Pharmacy Dispensary</h1>
             <p className="module-subtitle">
-              Legally binding digital prescriptions with dosage regimens, authorized refills, and pharmacy fulfillment status.
+              Demo prescription records. Doctors and administrators can add private, account-linked notes to each record.
             </p>
           </div>
         </div>
+
+        {prescriptionError && <p className="module-subtitle" role="alert">{prescriptionError}</p>}
+        {prescriptionSuccess && <p className="module-subtitle" role="status">{prescriptionSuccess}</p>}
+        {prescriptionLoading && <Card>Loading your saved prescription notes…</Card>}
 
         <div className="prescriptions-grid">
           {PRESCRIPTIONS_DATA.map((rx) => (
@@ -1119,10 +1225,33 @@ export default function ModuleView() {
                   <CheckCircle2 size={15} className="text-success" />
                   <span>{rx.pharmacy}</span>
                 </div>
+
+                <div className="form-group-field rx-notes-field">
+                  <label className="form-lbl" htmlFor={`prescription-note-${rx.id}`}>Private Notes</label>
+                  <textarea
+                    id={`prescription-note-${rx.id}`}
+                    rows={3}
+                    maxLength={5000}
+                    className="module-textarea-input"
+                    placeholder="Write a note for this prescription…"
+                    value={prescriptionDrafts[rx.id] ?? prescriptionNotes[rx.id] ?? ''}
+                    onChange={(event) => setPrescriptionDrafts((items) => ({ ...items, [rx.id]: event.target.value }))}
+                    disabled={prescriptionLoading}
+                  />
+                  <span className="rx-note-privacy-hint">Only your signed-in clinician account can view these notes.</span>
+                </div>
               </div>
 
               <div className="rx-card-footer">
                 <span className="rx-id-code">{rx.id} • Authorized on {rx.date}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={prescriptionLoading || prescriptionSaving}
+                  onClick={() => savePrescriptionNote(rx.id)}
+                >
+                  Save Note
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"

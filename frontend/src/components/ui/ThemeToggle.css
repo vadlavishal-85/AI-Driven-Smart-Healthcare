@@ -1,0 +1,56 @@
+.sh-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 38px;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  background: var(--surface-card);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: var(--transition-fast);
+}
+
+.sh-theme-toggle:hover,
+.sh-theme-toggle:focus-visible {
+  border-color: var(--clinical-cyan);
+  color: var(--clinical-cyan-dark);
+  outline: none;
+}
+
+.sh-theme-toggle svg {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 768px) {
+  .sh-theme-toggle {
+    width: 38px;
+    padding: 0;
+  }
+
+  .sh-theme-toggle span {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1200px) {
+  .sh-theme-toggle {
+    width: 38px;
+    padding: 0;
+  }
+
+  .sh-theme-toggle span {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .sh-theme-toggle {
+    width: 34px;
+    min-height: 34px;
+  }
+}

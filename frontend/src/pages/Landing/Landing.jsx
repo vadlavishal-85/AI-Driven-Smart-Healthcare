@@ -26,6 +26,7 @@ import doctorRoleImg from '../../assets/images/doctor_role.jpg';
 import patientRoleImg from '../../assets/images/patient_role.jpg';
 import adminRoleImg from '../../assets/images/admin_role.jpg';
 import './Landing.css';
+import ThemeToggle from '../../components/ui/ThemeToggle';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -242,6 +243,7 @@ export default function Landing() {
             </nav>
 
             <div className="sh-landing-nav-cta">
+              <ThemeToggle />
               <button
                 type="button"
                 onClick={() => navigate('/select-role')}

@@ -9,6 +9,8 @@ from app.auth.router import router as auth_router
 from app.users.router import router as users_router
 from app.appointments.router import router as appointments_router
 from app.admin.router import router as admin_router
+from app.patients.router import router as patients_router
+from app.prescription_notes.router import router as prescription_notes_router
 from app.database.mongodb import check_mongodb_connection
 from app.database.mysql import (
     Base,
@@ -76,6 +78,8 @@ app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(appointments_router)
 app.include_router(admin_router)
+app.include_router(patients_router)
+app.include_router(prescription_notes_router)
 
 
 @app.on_event("startup")

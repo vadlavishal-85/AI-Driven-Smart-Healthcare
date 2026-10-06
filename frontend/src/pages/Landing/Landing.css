@@ -127,6 +127,12 @@
   justify-content: space-between;
 }
 
+.sh-landing-nav-cta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .sh-landing-brand-logo {
   display: flex;
   align-items: center;
@@ -1003,6 +1009,26 @@
 }
 
 @media (max-width: 640px) {
+  .sh-landing-nav-header {
+    padding: 0.75rem 0;
+  }
+  .sh-brand-title-main {
+    font-size: 0.9rem;
+  }
+  .sh-brand-icon-halo {
+    width: 36px;
+    height: 36px;
+  }
+  .sh-brand-title-tag {
+    display: none;
+  }
+  .sh-landing-nav-cta {
+    gap: 0.4rem;
+  }
+  .sh-enter-btn-top {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.7rem;
+  }
   .sh-hero-headline {
     font-size: 2.2rem;
   }
