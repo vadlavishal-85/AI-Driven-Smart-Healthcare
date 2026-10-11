@@ -1,131 +1,102 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { AuthContext } from './AuthContextState';
-import { getToken, setToken, removeToken } from '../services/tokenService';
-import { loginUser, registerUser, getCurrentUser } from '../services/authService';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authService } from '../services/authService';
 
-export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [accessToken, setAccessToken] = useState(getToken());
+const AuthContext = createContext(null);
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(authService.getStoredUser());
+  const [token, setToken] = useState(authService.getToken());
   const [loading, setLoading] = useState(true);
 
-  // Initialize and restore authentication session on initial app load
+  // Initialize and verify session on load
   useEffect(() => {
-    let isMounted = true;
-
-    async function initializeAuth() {
-      const storedToken = getToken();
-
-      if (!storedToken) {
-        if (isMounted) {
-          setCurrentUser(null);
-          setAccessToken(null);
-          setLoading(false);
+    const initAuth = async () => {
+      const storedToken = authService.getToken();
+      if (storedToken) {
+        try {
+          const userData = await authService.getCurrentUser();
+          setUser(userData);
+          setToken(storedToken);
+        } catch {
+          // Token expired or invalid
+          authService.logout();
+          setUser(null);
+          setToken(null);
         }
-        return;
+      } else {
+        setUser(null);
+        setToken(null);
       }
-
-      try {
-        const user = await getCurrentUser(storedToken);
-        if (isMounted) {
-          setCurrentUser(user);
-          setAccessToken(storedToken);
-        }
-      } catch {
-        // Token is invalid, expired, or rejected by server -> clean up
-        removeToken();
-        if (isMounted) {
-          setCurrentUser(null);
-          setAccessToken(null);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    initializeAuth();
-
-    return () => {
-      isMounted = false;
+      setLoading(false);
     };
+
+    initAuth();
   }, []);
 
-  /**
-   * Login user with credentials, persist JWT, and retrieve user identity.
-   */
-  const login = useCallback(async ({ email, password, rememberMe = false }) => {
-    // 1. Authenticate and receive JWT
-    const tokenData = await loginUser({ email, password });
-    const token = tokenData.access_token;
-
-    // 2. Persist token in localStorage
-    setToken(token, { persistent: rememberMe });
-    setAccessToken(token);
-
-    // 3. Retrieve authenticated user details from /auth/me
-    try {
-      const user = await getCurrentUser(token);
-      setCurrentUser(user);
-      return user;
-    } catch (err) {
-      // If fetching user profile fails, clean up token
-      removeToken();
-      setAccessToken(null);
-      setCurrentUser(null);
-      throw err;
-    }
-  }, []);
-
-  /**
-   * Register a new patient account with backend.
-   */
-  const register = useCallback(async (userData) => {
-    return await registerUser(userData);
-  }, []);
-
-  /**
-   * Clear JWT from storage and reset authentication state.
-   */
-  const logout = useCallback(() => {
-    removeToken();
-    setAccessToken(null);
-    setCurrentUser(null);
-  }, []);
-
-  /**
-   * Update the currentUser in state after a successful profile edit.
-   */
-  const updateUser = useCallback((updatedUserData) => {
-    setCurrentUser((prev) => (prev ? { ...prev, ...updatedUserData } : updatedUserData));
-  }, []);
-
-  /**
-   * Helper to verify if the user possesses a specific role.
-   * Authoritative role is derived strictly from backend /auth/me.
-   */
-  const hasRole = useCallback(
-    (roleName) => {
-      if (!currentUser || !currentUser.role) return false;
-      return currentUser.role.toUpperCase() === roleName.toUpperCase();
-    },
-    [currentUser]
-  );
-
-  const value = {
-    currentUser,
-    accessToken,
-    isAuthenticated: Boolean(currentUser && accessToken),
-    loading,
-    login,
-    register,
-    logout,
-    updateUser,
-    hasRole,
-    isAdmin: currentUser?.role === 'ADMIN',
-    isDoctor: currentUser?.role === 'DOCTOR',
-    isPatient: currentUser?.role === 'PATIENT',
+  const login = async (email, password) => {
+    const data = await authService.login(email, password);
+    setToken(data.access_token);
+    const userData = await authService.getCurrentUser();
+    setUser(userData);
+    return userData;
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
+  const register = async (userData) => {
+    return await authService.register(userData);
+  };
+
+  const logout = () => {
+    authService.logout();
+    setUser(null);
+    setToken(null);
+  };
+
+  const refreshUser = async () => {
+    try {
+      const userData = await authService.getCurrentUser();
+      setUser(userData);
+      return userData;
+    } catch {
+      return null;
+    }
+  };
+
+  const role = user ? user.role : null;
+  const isAuthenticated = !!token && !!user;
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        role,
+        isAuthenticated,
+        loading,
+        login,
+        register,
+        logout,
+        refreshUser,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    return {
+      user: null,
+      token: null,
+      role: null,
+      isAuthenticated: false,
+      loading: false,
+      login: async () => {},
+      register: async () => {},
+      logout: () => {},
+      refreshUser: async () => {},
+    };
+  }
+  return context;
+};

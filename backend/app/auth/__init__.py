@@ -1,3 +1,0 @@
-"""
-SmartHealthcare Authentication & RBAC Module
-"""

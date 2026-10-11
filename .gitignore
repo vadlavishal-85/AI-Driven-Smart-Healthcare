@@ -1,13 +1,14 @@
+# Environment Variables
+.env
+.env.*
+!.env.example
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
-venv/
-.venv/
-ENV/
 build/
 develop-eggs/
 dist/
@@ -20,44 +21,54 @@ parts/
 sdist/
 var/
 wheels/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# Virtual Environment
-.env
-.env.local
-.env.*.local
-!.env.example
+# Python Virtual Environments
+venv/
+.venv/
+env/
+.env/
+ENV/
+env.bak/
+venv.bak/
 
-# Node / Frontend
+# Node.js & Dependencies
 node_modules/
-frontend/dist/
-frontend/dist-ssr/
-*.local
-
-# Logs
-logs
-*.log
-*.sqlite
-*.sqlite3
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
+.pnpm-debug.log*
+.npm/
 
-# Editor / IDE
+# Frontend / Vite Build Outputs
+dist/
+dist-ssr/
+*.local
+
+# IDE & Editor Settings
 .vscode/
 .idea/
-*.sublime-project
+*.swp
+*.swo
+*~
 *.sublime-workspace
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+*.sublime-project
 
-# OS Generated
+# OS Generated Files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+
+# Project Docs / Reports Kept Local-Only
+Vehicle_Service_History_Management_System_PBL_Report.docx
+AI_Smart_Healthcare_Project_Documentation.docx
+

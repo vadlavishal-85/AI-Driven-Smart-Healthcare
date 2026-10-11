@@ -1,16 +1,55 @@
-# React + Vite
+# Frontend - AI-Driven Smart Healthcare Data Exchange and Analytics Ecosystem
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+This is the React + Vite frontend application for the AI-Driven Smart Healthcare Data Exchange and Analytics Ecosystem.
 
-Currently, two official plugins are available:
+## Prerequisites
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- [npm](https://www.npmjs.com/) (installed with Node.js)
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. Navigate to the Frontend Directory
 
-## Expanding the Oxlint configuration
+From the project root (`DBMS NEW PROJECT`):
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```bash
+cd frontend
+```
+
+### 2. Install Dependencies
+
+Install the required packages:
+
+```bash
+npm install
+```
+
+### 3. Run the Development Server
+
+Start the local Vite development server:
+
+```bash
+npm run dev
+```
+
+Open your browser and navigate to:
+```
+http://localhost:5173/
+```
+
+### 4. Create a Production Build
+
+To bundle and build the application for production:
+
+```bash
+npm run build
+```
+
+The production assets will be generated in the `frontend/dist/` directory.
+
+To preview the production build locally:
+
+```bash
+npm run preview
+```

@@ -1,69 +1,39 @@
-import { apiFetch } from './api';
+import api from './api';
 
-/**
- * Register a new patient account via FastAPI backend.
- * Public registration is restricted to PATIENT role.
- *
- * @param {Object} data
- * @param {string} data.first_name
- * @param {string} data.last_name
- * @param {string} data.email
- * @param {string} data.password
- * @param {string} [data.phone]
- * @param {string} [data.role='PATIENT']
- * @returns {Promise<Object>} Created user identity (UserResponse)
- */
-export async function registerUser({ first_name, last_name, email, password, phone }) {
-  const payload = {
-    first_name: first_name?.trim(),
-    last_name: last_name?.trim(),
-    email: email?.trim().toLowerCase(),
-    password,
-    role: 'PATIENT', // Always force PATIENT for public self-registration
-  };
+export const authService = {
+  login: async (email, password) => {
+    const response = await api.post('/auth/login', { email, password });
+    if (response.data.access_token) {
+      localStorage.setItem('token', response.data.access_token);
+    }
+    return response.data;
+  },
 
-  if (phone && phone.trim()) {
-    payload.phone = phone.trim();
-  }
+  register: async (userData) => {
+    const response = await api.post('/auth/register', userData);
+    return response.data;
+  },
 
-  return await apiFetch('/auth/register', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  });
-}
+  getCurrentUser: async () => {
+    const response = await api.get('/auth/me');
+    if (response.data) {
+      localStorage.setItem('user', JSON.stringify(response.data));
+    }
+    return response.data;
+  },
 
-/**
- * Authenticate credentials via FastAPI backend and obtain JWT access token.
- *
- * @param {Object} credentials
- * @param {string} credentials.email
- * @param {string} credentials.password
- * @returns {Promise<{ access_token: string, token_type: string }>}
- */
-export async function loginUser({ email, password }) {
-  return await apiFetch('/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({
-      email: email?.trim().toLowerCase(),
-      password,
-    }),
-  });
-}
+  logout: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  },
 
-/**
- * Fetch profile and verified role of currently authenticated user.
- *
- * @param {string} [token] - Optional explicit token, otherwise uses token from localStorage
- * @returns {Promise<Object>} Current user identity (UserResponse)
- */
-export async function getCurrentUser(token) {
-  const headers = {};
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  return await apiFetch('/auth/me', {
-    method: 'GET',
-    headers,
-  });
-}
+  getToken: () => localStorage.getItem('token'),
+  getStoredUser: () => {
+    const userStr = localStorage.getItem('user');
+    try {
+      return userStr ? JSON.parse(userStr) : null;
+    } catch {
+      return null;
+    }
+  },
+};

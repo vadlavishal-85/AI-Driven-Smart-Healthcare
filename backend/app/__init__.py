@@ -1,3 +1,0 @@
-"""
-SmartHealthcare Backend Application Package
-"""
