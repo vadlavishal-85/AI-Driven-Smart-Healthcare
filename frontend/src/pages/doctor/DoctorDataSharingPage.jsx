@@ -20,21 +20,26 @@ const DoctorDataSharingPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [fetchError, setFetchError] = useState('');
 
   const fetchData = async () => {
     try {
       setLoading(true);
+      setFetchError('');
       const [sharesData, patientsData] = await Promise.all([
-        dataSharingService.getDoctorShares(),
-        patientService.getPatientsForDoctor(),
+        dataSharingService.getDoctorShares().catch((err) => {
+          console.warn('Could not load shares:', err);
+          return [];
+        }),
+        patientService.getPatientsForDoctor().catch(() => []),
       ]);
       setShares(Array.isArray(sharesData) ? sharesData : []);
       setPatients(Array.isArray(patientsData) ? patientsData : []);
       if (patientsData && patientsData.length > 0) {
         setSelectedPatientId(patientsData[0].id);
       }
-    } catch {
-      // handle error
+    } catch (err) {
+      setFetchError('Failed to load sharing records from PostgreSQL.');
     } finally {
       setLoading(false);
     }
@@ -117,6 +122,26 @@ const DoctorDataSharingPage = () => {
         >
           <CheckCircle2 size={18} />
           <span>{successMsg}</span>
+        </div>
+      )}
+
+      {fetchError && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            padding: '14px 18px',
+            backgroundColor: '#fef2f2',
+            border: '1px solid #fecaca',
+            color: '#b91c1c',
+            borderRadius: '12px',
+            marginBottom: '24px',
+            fontSize: '14px',
+          }}
+        >
+          <AlertCircle size={18} />
+          <span>{fetchError}</span>
         </div>
       )}
 

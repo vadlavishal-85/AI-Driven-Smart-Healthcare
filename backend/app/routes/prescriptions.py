@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from typing import List
 from uuid import UUID
@@ -11,6 +12,7 @@ from app.database.mongodb import (
 from app.models.user import User
 from app.models.doctor import Doctor
 from app.models.patient import Patient
+from app.models.notification import Notification
 from app.models.role import UserRole
 from app.core.dependencies import get_current_user, require_roles
 from app.schemas.prescription import (
@@ -19,6 +21,7 @@ from app.schemas.prescription import (
 )
 from app.utils.mongo import parse_object_id, format_doc
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/prescriptions", tags=["Prescriptions"])
 
 
@@ -85,6 +88,22 @@ def create_prescription(
     result = prescriptions_collection.insert_one(prescription_doc)
     prescription_doc["_id"] = result.inserted_id
 
+    # Notify intended patient of newly issued prescription
+    doc_user = doctor.user
+    doc_name = doc_user.full_name if doc_user else "Doctor"
+    clean_doc_name = doc_name if doc_name.startswith("Dr. ") else f"Dr. {doc_name}"
+
+    notification = Notification(
+        user_id=patient.user_id,
+        title="New Prescription Issued",
+        message=f"{clean_doc_name} has issued a new prescription for your consultation.",
+        type="PRESCRIPTION_CREATED",
+        is_read=False,
+        created_at=now,
+    )
+    db.add(notification)
+    db.commit()
+
     return format_doc(prescription_doc)
 
 
@@ -107,12 +126,19 @@ def get_my_prescriptions(
             detail="Patient profile not found",
         )
 
-    prescriptions = list(
-        prescriptions_collection.find(
-            {"patient_id": str(patient.id)}
-        ).sort("created_at", -1)
-    )
-    return [format_doc(p) for p in prescriptions]
+    try:
+        prescriptions = list(
+            prescriptions_collection.find(
+                {"patient_id": str(patient.id)}
+            ).sort("created_at", -1)
+        )
+        return [format_doc(p) for p in prescriptions]
+    except Exception as e:
+        logger.error(f"Error querying patient prescriptions from MongoDB: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"MongoDB query failed: {str(e)}",
+        )
 
 
 @router.get(
@@ -140,12 +166,19 @@ def get_patient_prescriptions(
             detail="Patient not found",
         )
 
-    prescriptions = list(
-        prescriptions_collection.find(
-            {"patient_id": str(patient_id), "doctor_id": str(doctor.id)}
-        ).sort("created_at", -1)
-    )
-    return [format_doc(p) for p in prescriptions]
+    try:
+        prescriptions = list(
+            prescriptions_collection.find(
+                {"patient_id": str(patient_id), "doctor_id": str(doctor.id)}
+            ).sort("created_at", -1)
+        )
+        return [format_doc(p) for p in prescriptions]
+    except Exception as e:
+        logger.error(f"Error querying prescriptions from MongoDB: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"MongoDB query failed: {str(e)}",
+        )
 
 
 @router.get(

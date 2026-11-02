@@ -36,6 +36,111 @@ const getDoctorDepartment = (spec) => {
   return spec;
 };
 
+const DEMO_MEDICAL_RECORDS = [
+  {
+    id: 'demo-rec-1',
+    record_type: 'CONSULTATION',
+    title: 'Comprehensive Cardiovascular Assessment',
+    description: 'Routine quarterly cardiac assessment following stage-2 hypertension management and mild exertional fatigue.',
+    diagnosis: 'Essential Hypertension (Stage 2) with Controlled Dyslipidemia',
+    symptoms: ['Mild exertional dyspnea', 'Occasional morning headaches', 'Elevated resting BP (142/92 mmHg)'],
+    treatment: 'Initiated Amlodipine 5mg daily; lifestyle sodium restriction and aerobic regimen prescribed.',
+    doctor: 'Dr. Rahul Sharma (Cardiology)',
+    date: '10 Oct 2026',
+  },
+  {
+    id: 'demo-rec-2',
+    record_type: 'LAB_RESULT',
+    title: 'Comprehensive Metabolic Panel & Glycemic Review',
+    description: 'Endocrine diagnostic follow-up evaluating fasting plasma glucose, HbA1c, and renal function markers.',
+    diagnosis: 'Type 2 Diabetes Mellitus with Stable Glycemic Index',
+    symptoms: ['Postprandial lethargy', 'Occasional polydipsia', 'Fasting BG 134 mg/dL'],
+    treatment: 'Titrated Metformin HCl 500mg BID; dietary fiber increase recommended; recheck HbA1c in 90 days.',
+    doctor: 'Dr. Priya Reddy (Dermatology & Internal Medicine)',
+    date: '08 Oct 2026',
+  },
+  {
+    id: 'demo-rec-3',
+    record_type: 'DIAGNOSTIC_REPORT',
+    title: 'Pulmonary Function Assessment & Spirometry',
+    description: 'Clinical evaluation of seasonal bronchial hypersensitivity and post-infectious bronchial twitching.',
+    diagnosis: 'Mild Persistent Asthma with Allergic Rhinitis Trigger',
+    symptoms: ['Nocturnal dry cough', 'Mild expiratory wheeze', 'Peak expiratory flow rate at 82%'],
+    treatment: 'Budesonide/Formoterol 160/4.5 mcg inhaler BID; oral Montelukast 10mg nocte for 30 days.',
+    doctor: 'Dr. Arjun Kumar (Neurology & Pulmonology)',
+    date: '05 Oct 2026',
+  },
+];
+
+const DEMO_PRESCRIPTIONS = [
+  {
+    id: 'demo-rx-1',
+    created_at: '2026-10-10T10:30:00Z',
+    medical_record_id: 'DEMO-CARDIO-402',
+    medicines: [
+      {
+        name: 'Amlodipine Besylate',
+        dosage: '5 mg',
+        frequency: 'Once daily (Morning)',
+        duration: '30 days',
+        instructions: 'Take with or without food. Monitor blood pressure weekly.',
+      },
+      {
+        name: 'Atorvastatin Calcium',
+        dosage: '20 mg',
+        frequency: 'Once daily (Bedtime)',
+        duration: '30 days',
+        instructions: 'Take after dinner. Avoid grapefruit products.',
+      },
+    ],
+    notes: 'Schedule BP re-check after 4 weeks of continuous medication adherence.',
+  },
+  {
+    id: 'demo-rx-2',
+    created_at: '2026-10-08T14:15:00Z',
+    medical_record_id: 'DEMO-ENDO-108',
+    medicines: [
+      {
+        name: 'Metformin Hydrochloride (Extended Release)',
+        dosage: '500 mg',
+        frequency: 'Twice daily',
+        duration: '60 days',
+        instructions: 'Take immediately with meals to minimize gastrointestinal discomfort.',
+      },
+      {
+        name: 'Empagliflozin',
+        dosage: '10 mg',
+        frequency: 'Once daily (Morning)',
+        duration: '30 days',
+        instructions: 'Maintain adequate hydration throughout the day.',
+      },
+    ],
+    notes: 'Maintain dietary carbohydrate restriction and self-monitor fasting blood sugars.',
+  },
+  {
+    id: 'demo-rx-3',
+    created_at: '2026-10-05T09:45:00Z',
+    medical_record_id: 'DEMO-PULM-771',
+    medicines: [
+      {
+        name: 'Budesonide / Formoterol Fumarate Inhaler',
+        dosage: '160 mcg / 4.5 mcg',
+        frequency: '2 puffs Twice daily',
+        duration: '30 days',
+        instructions: 'Rinse mouth with water thoroughly after each inhalation.',
+      },
+      {
+        name: 'Montelukast Sodium',
+        dosage: '10 mg',
+        frequency: 'Once daily at night',
+        duration: '30 days',
+        instructions: 'Take with a glass of water before bedtime.',
+      },
+    ],
+    notes: 'Carry quick-relief rescue inhaler during seasonal allergen peaks.',
+  },
+];
+
 const DoctorRecordsPage = () => {
   const { user } = useAuth();
   const [doctorProfile, setDoctorProfile] = useState(null);
@@ -925,22 +1030,134 @@ const DoctorRecordsPage = () => {
             })}
           </div>
         )}
+
+        {/* DEMONSTRATION EXAMPLES SECTION (UI PREVIEW ONLY) */}
+        {uniqueRecords.length < 3 && (
+          <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '2px dashed #cbd5e1' }}>
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    padding: '3px 8px',
+                    borderRadius: '6px',
+                    backgroundColor: '#fef3c7',
+                    color: '#b45309',
+                    border: '1px solid #fde68a',
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  UI Demonstration Preview
+                </span>
+                <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#334155', margin: 0 }}>
+                  Demonstration Medical Record Examples
+                </h4>
+              </div>
+              <p style={{ fontSize: '12.5px', color: '#64748b', margin: '4px 0 0 0' }}>
+                Clearly labeled frontend-only demonstration preview. Separated from clinical workflows and never submitted to database.
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px' }}>
+              {DEMO_MEDICAL_RECORDS.map((demo) => (
+                <div
+                  key={demo.id}
+                  style={{
+                    backgroundColor: '#ffffff',
+                    borderRadius: '16px',
+                    border: '1.5px dashed #f59e0b',
+                    padding: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxShadow: '0 2px 8px rgba(245, 158, 11, 0.05)',
+                  }}
+                >
+                  <div style={{ marginBottom: '12px' }}>
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        backgroundColor: '#fffbeb',
+                        color: '#b45309',
+                        border: '1px solid #fde68a',
+                        fontSize: '11px',
+                        fontWeight: 800,
+                        letterSpacing: '0.04em',
+                      }}
+                    >
+                      ⚠️ DEMO — NOT A REAL PATIENT RECORD
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', padding: '3px 8px', borderRadius: '4px', backgroundColor: '#e0f2fe', color: '#0284c7' }}>
+                      {demo.record_type}
+                    </span>
+                    <span style={{ fontSize: '12px', color: '#64748b' }}>{demo.date}</span>
+                  </div>
+
+                  <h4 style={{ fontSize: '15.5px', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>
+                    {demo.title}
+                  </h4>
+
+                  <p style={{ fontSize: '13px', color: '#475569', marginBottom: '12px', lineHeight: 1.5 }}>
+                    {demo.description}
+                  </p>
+
+                  <div style={{ backgroundColor: '#f8fafc', padding: '12px', borderRadius: '10px', marginBottom: '14px', border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: '12.5px', marginBottom: '4px' }}>
+                      <strong style={{ color: '#334155' }}>Diagnosis:</strong> <span style={{ color: '#0284c7', fontWeight: 600 }}>{demo.diagnosis}</span>
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>
+                      <strong>Symptoms:</strong> {demo.symptoms.join(', ')}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#059669' }}>
+                      <strong>Treatment:</strong> {demo.treatment}
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+                    <span style={{ fontSize: '12px', color: '#64748b' }}>
+                      Attending: <strong>{demo.doctor}</strong>
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic' }}>
+                      Preview Only
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 5. PATIENT PRESCRIPTIONS & SHARE PRESCRIPTION */}
-      {prescriptions.length > 0 && (
-        <div style={{ marginBottom: '36px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <div>
-              <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                Patient Prescriptions
-              </h3>
-              <p style={{ fontSize: '13px', color: '#64748b', margin: '2px 0 0' }}>
-                Active medication orders and prescription records
-              </p>
-            </div>
+      <div style={{ marginBottom: '36px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+              Patient Prescriptions
+            </h3>
+            <p style={{ fontSize: '13px', color: '#64748b', margin: '2px 0 0' }}>
+              Active medication orders and prescription records for {selectedPatient ? selectedPatient.full_name : 'patient'}
+            </p>
           </div>
+        </div>
 
+        {prescriptions.length === 0 ? (
+          <div className="card" style={{ padding: '36px', textAlign: 'center', color: '#94a3b8' }}>
+            <Pill size={40} style={{ margin: '0 auto 10px auto', opacity: 0.4 }} />
+            <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#334155', margin: '0 0 4px 0' }}>
+              No Active Prescriptions Found
+            </h4>
+            <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
+              No medication orders have been authored for this patient yet.
+            </p>
+          </div>
+        ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '18px' }}>
             {prescriptions.map((rx) => {
               const rxDate = new Date(rx.created_at).toLocaleDateString('en-GB', {
@@ -1028,8 +1245,139 @@ const DoctorRecordsPage = () => {
               );
             })}
           </div>
-        </div>
-      )}
+        )}
+
+        {/* DEMONSTRATION PRESCRIPTIONS SECTION (UI PREVIEW ONLY) */}
+        {prescriptions.length < 3 && (
+          <div style={{ marginTop: '28px', paddingTop: '20px', borderTop: '2px dashed #cbd5e1' }}>
+            <div style={{ marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    padding: '3px 8px',
+                    borderRadius: '6px',
+                    backgroundColor: '#fef3c7',
+                    color: '#b45309',
+                    border: '1px solid #fde68a',
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  UI Demonstration Preview
+                </span>
+                <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#334155', margin: 0 }}>
+                  Demonstration Prescription Examples
+                </h4>
+              </div>
+              <p style={{ fontSize: '12.5px', color: '#64748b', margin: '4px 0 0 0' }}>
+                Clearly labeled frontend-only demonstration preview. Separated from clinical workflows and never submitted to database.
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '18px' }}>
+              {DEMO_PRESCRIPTIONS.map((demoRx) => (
+                <div
+                  key={demoRx.id}
+                  style={{
+                    backgroundColor: '#ffffff',
+                    borderRadius: '16px',
+                    border: '1.5px dashed #f59e0b',
+                    padding: '18px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 2px 8px rgba(245, 158, 11, 0.05)',
+                  }}
+                >
+                  <div>
+                    <div style={{ marginBottom: '10px' }}>
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          backgroundColor: '#fffbeb',
+                          color: '#b45309',
+                          border: '1px solid #fde68a',
+                          fontSize: '10.5px',
+                          fontWeight: 800,
+                          letterSpacing: '0.04em',
+                        }}
+                      >
+                        ⚠️ DEMO — NOT A REAL PATIENT RECORD
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          color: '#0d9488',
+                          backgroundColor: '#ccfbf1',
+                          padding: '2px 8px',
+                          borderRadius: '6px',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        <Pill size={12} />
+                        <span>Prescription Regimen</span>
+                      </span>
+                      <span style={{ fontSize: '11.5px', color: '#64748b' }}>
+                        {new Date(demoRx.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
+                      {demoRx.medicines.map((m, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            padding: '8px 10px',
+                            backgroundColor: '#f8fafc',
+                            borderRadius: '8px',
+                            border: '1px solid #e2e8f0',
+                          }}
+                        >
+                          <strong style={{ fontSize: '13.5px', color: '#0f172a' }}>{m.name}</strong>
+                          <div style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}>
+                            {m.dosage} • {m.frequency} • {m.duration}
+                          </div>
+                          {m.instructions && (
+                            <div style={{ fontSize: '11.5px', color: '#64748b', fontStyle: 'italic', marginTop: '2px' }}>
+                              {m.instructions}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {demoRx.notes && (
+                      <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '10px' }}>
+                        Clinical Advisory: {demoRx.notes}
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+                    <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                      Ref Record: <code>{demoRx.medical_record_id}</code>
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#d97706', fontWeight: 600, fontStyle: 'italic' }}>
+                      Demonstration Only
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* MODAL 1: SHARE MEDICAL RECORD */}
       {shareRecordModal.isOpen && shareRecordModal.record && (

@@ -5,6 +5,75 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { recordService } from '../../services/recordService';
 import { patientService } from '../../services/patientService';
 
+const DEMO_PRESCRIPTIONS = [
+  {
+    id: 'demo-rx-1',
+    created_at: '2026-10-10T10:30:00Z',
+    medical_record_id: 'DEMO-CARDIO-402',
+    medicines: [
+      {
+        name: 'Amlodipine Besylate',
+        dosage: '5 mg',
+        frequency: 'Once daily (Morning)',
+        duration: '30 days',
+        instructions: 'Take with or without food. Monitor blood pressure weekly.',
+      },
+      {
+        name: 'Atorvastatin Calcium',
+        dosage: '20 mg',
+        frequency: 'Once daily (Bedtime)',
+        duration: '30 days',
+        instructions: 'Take after dinner. Avoid grapefruit products.',
+      },
+    ],
+    notes: 'Schedule BP re-check after 4 weeks of continuous medication adherence.',
+  },
+  {
+    id: 'demo-rx-2',
+    created_at: '2026-10-08T14:15:00Z',
+    medical_record_id: 'DEMO-ENDO-108',
+    medicines: [
+      {
+        name: 'Metformin Hydrochloride (Extended Release)',
+        dosage: '500 mg',
+        frequency: 'Twice daily',
+        duration: '60 days',
+        instructions: 'Take immediately with meals to minimize gastrointestinal discomfort.',
+      },
+      {
+        name: 'Empagliflozin',
+        dosage: '10 mg',
+        frequency: 'Once daily (Morning)',
+        duration: '30 days',
+        instructions: 'Maintain adequate hydration throughout the day.',
+      },
+    ],
+    notes: 'Maintain dietary carbohydrate restriction and self-monitor fasting blood sugars.',
+  },
+  {
+    id: 'demo-rx-3',
+    created_at: '2026-10-05T09:45:00Z',
+    medical_record_id: 'DEMO-PULM-771',
+    medicines: [
+      {
+        name: 'Budesonide / Formoterol Fumarate Inhaler',
+        dosage: '160 mcg / 4.5 mcg',
+        frequency: '2 puffs Twice daily',
+        duration: '30 days',
+        instructions: 'Rinse mouth with water thoroughly after each inhalation.',
+      },
+      {
+        name: 'Montelukast Sodium',
+        dosage: '10 mg',
+        frequency: 'Once daily at night',
+        duration: '30 days',
+        instructions: 'Take with a glass of water before bedtime.',
+      },
+    ],
+    notes: 'Carry quick-relief rescue inhaler during seasonal allergen peaks.',
+  },
+];
+
 const DoctorPrescriptionsPage = () => {
   const [patients, setPatients] = useState([]);
   const [selectedPatientId, setSelectedPatientId] = useState('');
@@ -224,6 +293,140 @@ const DoctorPrescriptionsPage = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* DEMONSTRATION PRESCRIPTIONS SECTION (UI PREVIEW ONLY) */}
+      {prescriptions.length < 3 && (
+        <div style={{ marginTop: '36px', paddingTop: '24px', borderTop: '2px dashed #cbd5e1' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  backgroundColor: '#fef3c7',
+                  color: '#b45309',
+                  border: '1px solid #fde68a',
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                UI Demonstration Preview
+              </span>
+              <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#334155', margin: 0 }}>
+                Demonstration Prescription Examples
+              </h4>
+            </div>
+            <p style={{ fontSize: '12.5px', color: '#64748b', margin: '4px 0 0 0' }}>
+              Clearly labeled frontend-only demonstration preview. Separated from clinical workflows and never submitted to database.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px' }}>
+            {DEMO_PRESCRIPTIONS.map((rx) => (
+              <div
+                key={rx.id}
+                style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '16px',
+                  border: '1.5px dashed #f59e0b',
+                  padding: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 2px 8px rgba(245, 158, 11, 0.05)',
+                }}
+              >
+                <div>
+                  <div style={{ marginBottom: '12px' }}>
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        backgroundColor: '#fffbeb',
+                        color: '#b45309',
+                        border: '1px solid #fde68a',
+                        fontSize: '11px',
+                        fontWeight: 800,
+                        letterSpacing: '0.04em',
+                      }}
+                    >
+                      ⚠️ DEMO — NOT A REAL PATIENT RECORD
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        color: '#0d9488',
+                        backgroundColor: '#ccfbf1',
+                        padding: '3px 10px',
+                        borderRadius: '6px',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      <Pill size={14} />
+                      <span>Prescription Regimen</span>
+                    </span>
+                    <span style={{ fontSize: '12px', color: '#64748b' }}>
+                      {new Date(rx.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '14px' }}>
+                    {rx.medicines?.map((m, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          padding: '10px 12px',
+                          backgroundColor: '#f8fafc',
+                          borderRadius: '10px',
+                          border: '1px solid #f1f5f9',
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <strong style={{ fontSize: '14.5px', color: '#0f172a' }}>{m.name}</strong>
+                          <span style={{ fontSize: '12px', fontWeight: 600, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#e2e8f0', color: '#334155' }}>
+                            {m.dosage}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: '12.5px', color: '#64748b', marginTop: '4px', margin: '4px 0 0 0' }}>
+                          Frequency: <strong>{m.frequency}</strong> • Duration: {m.duration}
+                        </p>
+                        <p style={{ fontSize: '12px', color: '#0284c7', marginTop: '2px', margin: '2px 0 0 0' }}>
+                          Instructions: {m.instructions}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {rx.notes && (
+                    <p style={{ fontSize: '12.5px', color: '#475569', marginTop: '10px', margin: '10px 0 0 0' }}>
+                      Clinical Advisory: <em>{rx.notes}</em>
+                    </p>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+                  <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                    Ref Record: <code>{rx.medical_record_id}</code>
+                  </span>
+                  <span style={{ fontSize: '11px', color: '#d97706', fontWeight: 600, fontStyle: 'italic' }}>
+                    Demonstration Only
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

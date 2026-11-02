@@ -8,6 +8,7 @@ from app.database.mongodb import lab_reports_collection
 from app.models.user import User
 from app.models.doctor import Doctor
 from app.models.patient import Patient
+from app.models.data_sharing import DataSharing
 from app.models.role import UserRole
 from app.core.dependencies import get_current_user, require_roles
 from app.schemas.lab_report import (
@@ -123,11 +124,35 @@ def get_patient_lab_reports(
             detail="Patient not found",
         )
 
-    reports = list(
-        lab_reports_collection.find({"patient_id": str(patient_id)}).sort(
-            "test_date", -1
+    # Doctor may only view reports they ordered or that were explicitly shared with them
+    shared_records = (
+        db.query(DataSharing)
+        .filter(
+            DataSharing.doctor_id == doctor.id,
+            DataSharing.patient_id == patient_id,
+            DataSharing.status == "APPROVED",
         )
+        .all()
     )
+    shared_ids = []
+    for s in shared_records:
+        try:
+            shared_ids.append(parse_object_id(s.record_id))
+        except Exception:
+            pass
+
+    query_filter = {
+        "patient_id": str(patient_id),
+    }
+    if shared_ids:
+        query_filter["$or"] = [
+            {"doctor_id": str(doctor.id)},
+            {"_id": {"$in": shared_ids}},
+        ]
+    else:
+        query_filter["doctor_id"] = str(doctor.id)
+
+    reports = list(lab_reports_collection.find(query_filter).sort("test_date", -1))
     return [format_doc(r) for r in reports]
 
 
@@ -168,6 +193,22 @@ def get_lab_report_by_id(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Forbidden: Doctor profile not found",
             )
+        # Verify doctor is ordering doctor or has approved data sharing
+        if report.get("doctor_id") != str(doctor.id):
+            has_approved_share = (
+                db.query(DataSharing)
+                .filter(
+                    DataSharing.doctor_id == doctor.id,
+                    DataSharing.record_id == str(report["_id"]),
+                    DataSharing.status == "APPROVED",
+                )
+                .first()
+            )
+            if not has_approved_share:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Forbidden: You are not the ordering doctor of this lab report",
+                )
     elif current_user.role == UserRole.LAB:
         # Authorized LAB personnel
         pass
@@ -179,3 +220,4 @@ def get_lab_report_by_id(
         )
 
     return format_doc(report)
+

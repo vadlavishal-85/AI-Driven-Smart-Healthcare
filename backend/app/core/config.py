@@ -2,8 +2,15 @@ import os
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
-# Load environment variables from .env file
-load_dotenv()
+from pathlib import Path
+
+# Load environment variables from .env file (supports running from root or backend directory)
+env_file = Path(__file__).resolve().parent.parent.parent / ".env"
+if env_file.exists():
+    load_dotenv(dotenv_path=env_file)
+else:
+    load_dotenv()
+
 
 
 class Settings(BaseModel):
@@ -34,7 +41,7 @@ class Settings(BaseModel):
     # CORS Configuration
     CORS_ORIGINS: str = os.getenv(
         "CORS_ORIGINS",
-        "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,https://smarthealthcare-frontend.onrender.com",
+        "http://localhost:5173,http://localhost:5174,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:3000",
     )
 
     @property

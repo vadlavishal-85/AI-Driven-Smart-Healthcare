@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, CheckCircle2, Clock, Check } from 'lucide-react';
+import { Bell, CheckCircle2, Clock, Check, Trash2 } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { notificationService } from '../services/notificationService';
@@ -29,6 +29,15 @@ const NotificationsPage = () => {
     try {
       await notificationService.markAsRead(id);
       setNotifications(notifications.map(n => n.id === id ? { ...n, is_read: true } : n));
+    } catch {
+      // error handled
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await notificationService.deleteNotification(id);
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
     } catch {
       // error handled
     }
@@ -135,27 +144,49 @@ const NotificationsPage = () => {
                 </div>
               </div>
 
-              {!notif.is_read && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {!notif.is_read && (
+                  <button
+                    onClick={() => handleMarkAsRead(notif.id)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--border-color)',
+                      backgroundColor: '#ffffff',
+                      color: 'var(--text-main)',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Check size={14} />
+                    Mark as Read
+                  </button>
+                )}
                 <button
-                  onClick={() => handleMarkAsRead(notif.id)}
+                  onClick={() => handleDelete(notif.id)}
+                  title="Delete notification"
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '6px',
-                    padding: '6px 12px',
+                    gap: '4px',
+                    padding: '6px 10px',
                     borderRadius: '6px',
-                    border: '1px solid var(--border-color)',
-                    backgroundColor: '#ffffff',
-                    color: 'var(--text-main)',
+                    border: '1px solid #fee2e2',
+                    backgroundColor: '#fef2f2',
+                    color: '#ef4444',
                     fontSize: '0.8rem',
                     fontWeight: 600,
                     cursor: 'pointer'
                   }}
                 >
-                  <Check size={14} />
-                  Mark as Read
+                  <Trash2 size={14} />
+                  Delete
                 </button>
-              )}
+              </div>
             </div>
           ))}
         </div>

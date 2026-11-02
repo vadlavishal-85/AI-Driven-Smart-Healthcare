@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Shield, UserCheck, Stethoscope, HeartPulse, TestTubes, CheckCircle2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Users, Shield, UserCheck, Stethoscope, HeartPulse, TestTubes, CheckCircle2, ArrowRight } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import StatCard from '../../components/common/StatCard';
 import { analyticsService } from '../../services/analyticsService';
+
 
 const AdminUsersPage = () => {
   const [userAnalytics, setUserAnalytics] = useState(null);
@@ -132,6 +134,59 @@ const AdminUsersPage = () => {
                   Diagnostics & biochemistry reports
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Quick Management Direct Links */}
+          <div style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+            <div className="card" style={{ padding: '24px', borderLeft: '4px solid #0d9488' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#ccfbf1', color: '#0d9488', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Stethoscope size={22} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>Doctor Management</h3>
+                    <span style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>Register physicians & verify clinical status</span>
+                  </div>
+                </div>
+              </div>
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                View credentialed specialists, register new licensed doctors with bcrypt authentication, and manage active status safely.
+              </p>
+              <Link
+                to="/admin/doctors"
+                className="btn btn-primary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none', fontSize: '13px' }}
+              >
+                <span>Open Doctor Directory & Register</span>
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+
+            <div className="card" style={{ padding: '24px', borderLeft: '4px solid #f59e0b' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <HeartPulse size={22} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>Patient Management</h3>
+                    <span style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>Register patients & safeguard clinical data</span>
+                  </div>
+                </div>
+              </div>
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                View patient registry, register new patients with PostgreSQL profile attributes, and execute safe deactivations.
+              </p>
+              <Link
+                to="/admin/patients"
+                className="btn btn-primary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none', fontSize: '13px', backgroundColor: '#d97706', borderColor: '#d97706' }}
+              >
+                <span>Open Patient Directory & Register</span>
+                <ArrowRight size={16} />
+              </Link>
             </div>
           </div>
         </>

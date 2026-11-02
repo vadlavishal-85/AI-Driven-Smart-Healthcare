@@ -24,6 +24,7 @@ class AppointmentCreateRequest(BaseModel):
     doctor_id: UUID
     appointment_date: datetime
     reason: Optional[str] = Field(None, max_length=500)
+    department: Optional[str] = None
 
 
 class AppointmentUpdateRequest(BaseModel):

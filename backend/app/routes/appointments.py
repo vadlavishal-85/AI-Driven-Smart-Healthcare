@@ -8,6 +8,7 @@ from app.models.user import User
 from app.models.doctor import Doctor
 from app.models.patient import Patient
 from app.models.appointment import Appointment
+from app.models.notification import Notification
 from app.models.role import UserRole
 from app.core.dependencies import require_roles
 from app.schemas.appointment import (
@@ -173,6 +174,16 @@ def create_appointment(
             detail="Doctor is not currently active",
         )
 
+    # Validate department association if specified
+    if request.department and request.department.strip():
+        req_dept = request.department.strip().lower()
+        doc_spec = (doctor.specialization or "").strip().lower()
+        if req_dept != doc_spec and req_dept not in doc_spec and doc_spec not in req_dept:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Doctor {doc_user.full_name} does not belong to the '{request.department}' department",
+            )
+
     # 4. Validate appointment date (cannot be in the past)
     now_utc = datetime.now(timezone.utc)
     apt_date = request.appointment_date
@@ -209,6 +220,36 @@ def create_appointment(
         status="SCHEDULED",
     )
     db.add(new_appointment)
+
+    # Trigger appointment booked notifications for both patient and doctor
+    doc_user = doctor.user
+    doc_name = doc_user.full_name if doc_user else "Doctor"
+    clean_doc_name = doc_name if doc_name.startswith("Dr. ") else f"Dr. {doc_name}"
+    pat_user = current_user
+    pat_name = pat_user.full_name if pat_user else "Patient"
+    date_str = request.appointment_date.strftime("%b %d, %Y at %I:%M %p")
+
+    db.add(
+        Notification(
+            user_id=patient.user_id,
+            title="Appointment Booked",
+            message=f"Your appointment with {clean_doc_name} is scheduled for {date_str}.",
+            type="APPOINTMENT_BOOKED",
+            is_read=False,
+            created_at=now_utc,
+        )
+    )
+    db.add(
+        Notification(
+            user_id=doctor.user_id,
+            title="New Appointment Scheduled",
+            message=f"{pat_name} has scheduled an appointment with you for {date_str}.",
+            type="APPOINTMENT_BOOKED",
+            is_read=False,
+            created_at=now_utc,
+        )
+    )
+
     db.commit()
     db.refresh(new_appointment)
 
@@ -268,6 +309,58 @@ def cancel_appointment(
         )
 
     appointment.status = "CANCELLED"
+    now_utc = datetime.now(timezone.utc)
+    doc_user = appointment.doctor.user if appointment.doctor else None
+    doc_name = doc_user.full_name if doc_user else "Doctor"
+    clean_doc_name = doc_name if doc_name.startswith("Dr. ") else f"Dr. {doc_name}"
+    pat_user = appointment.patient.user if appointment.patient else None
+    pat_name = pat_user.full_name if pat_user else "Patient"
+    date_str = appointment.appointment_date.strftime("%b %d, %Y at %I:%M %p")
+
+    # Notifications for cancellation
+    if current_user.role == UserRole.PATIENT.value:
+        db.add(
+            Notification(
+                user_id=appointment.doctor.user_id,
+                title="Appointment Cancelled",
+                message=f"{pat_name} has cancelled their appointment scheduled for {date_str}.",
+                type="APPOINTMENT_CANCELLED",
+                is_read=False,
+                created_at=now_utc,
+            )
+        )
+        db.add(
+            Notification(
+                user_id=appointment.patient.user_id,
+                title="Appointment Cancelled",
+                message=f"Your appointment with {clean_doc_name} for {date_str} has been cancelled.",
+                type="APPOINTMENT_CANCELLED",
+                is_read=False,
+                created_at=now_utc,
+            )
+        )
+    else:
+        db.add(
+            Notification(
+                user_id=appointment.patient.user_id,
+                title="Appointment Cancelled",
+                message=f"{clean_doc_name} has cancelled your appointment scheduled for {date_str}.",
+                type="APPOINTMENT_CANCELLED",
+                is_read=False,
+                created_at=now_utc,
+            )
+        )
+        db.add(
+            Notification(
+                user_id=appointment.doctor.user_id,
+                title="Appointment Cancelled",
+                message=f"You cancelled the appointment with {pat_name} scheduled for {date_str}.",
+                type="APPOINTMENT_CANCELLED",
+                is_read=False,
+                created_at=now_utc,
+            )
+        )
+
     db.commit()
     db.refresh(appointment)
 
@@ -314,14 +407,47 @@ def update_doctor_appointment(
         )
 
     # Update permitted fields
-    if request.appointment_date is not None:
+    old_date = appointment.appointment_date
+    rescheduled = False
+    if request.appointment_date is not None and request.appointment_date != old_date:
         appointment.appointment_date = request.appointment_date
+        rescheduled = True
     if request.reason is not None:
         appointment.reason = request.reason
     if request.notes is not None:
         appointment.notes = request.notes
     if request.status is not None:
         appointment.status = request.status
+
+    if rescheduled:
+        now_utc = datetime.now(timezone.utc)
+        doc_user = doctor.user
+        doc_name = doc_user.full_name if doc_user else "Doctor"
+        clean_doc_name = doc_name if doc_name.startswith("Dr. ") else f"Dr. {doc_name}"
+        pat_user = appointment.patient.user if appointment.patient else None
+        pat_name = pat_user.full_name if pat_user else "Patient"
+        new_date_str = appointment.appointment_date.strftime("%b %d, %Y at %I:%M %p")
+
+        db.add(
+            Notification(
+                user_id=appointment.patient.user_id,
+                title="Appointment Rescheduled",
+                message=f"Your appointment with {clean_doc_name} has been rescheduled to {new_date_str}.",
+                type="APPOINTMENT_RESCHEDULED",
+                is_read=False,
+                created_at=now_utc,
+            )
+        )
+        db.add(
+            Notification(
+                user_id=doctor.user_id,
+                title="Appointment Rescheduled",
+                message=f"Appointment with {pat_name} has been rescheduled to {new_date_str}.",
+                type="APPOINTMENT_RESCHEDULED",
+                is_read=False,
+                created_at=now_utc,
+            )
+        )
 
     db.commit()
     db.refresh(appointment)

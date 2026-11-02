@@ -5,6 +5,27 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { recordService } from '../../services/recordService';
 import { patientService } from '../../services/patientService';
 
+const DEMO_DOCTOR_NOTES = [
+  {
+    id: 'demo-note-1',
+    created_at: '2026-10-10T11:20:00Z',
+    medical_record_id: 'DEMO-CARDIO-402',
+    note: 'Patient attended for blood pressure titration review. Systolic levels averaging 138-144 mmHg at home. Commenced Amlodipine 5mg. Advised ambulatory cuff monitoring for 14 days and sodium-restricted diet.',
+  },
+  {
+    id: 'demo-note-2',
+    created_at: '2026-10-08T15:00:00Z',
+    medical_record_id: 'DEMO-ENDO-108',
+    note: 'Follow-up regarding fasting hyperglycemia. Glycemic log demonstrates steady fasting reduction to 118-124 mg/dL after Metformin regimen adherence. No hypoglycemic episodes reported. Renal panel stable.',
+  },
+  {
+    id: 'demo-note-3',
+    created_at: '2026-10-05T10:15:00Z',
+    medical_record_id: 'DEMO-PULM-771',
+    note: 'Evaluated recurrent nocturnal wheezing and dry cough. Spirometry reveals mild reversible airway obstruction. Initiated Budesonide inhaler BID. Metered dose inhaler spacing technique verified in clinic.',
+  },
+];
+
 const DoctorNotesPage = () => {
   const [patients, setPatients] = useState([]);
   const [selectedPatientId, setSelectedPatientId] = useState('');
@@ -187,6 +208,96 @@ const DoctorNotesPage = () => {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* DEMONSTRATION CLINICAL NOTES SECTION (UI PREVIEW ONLY) */}
+      {notes.length < 3 && (
+        <div style={{ marginTop: '36px', paddingTop: '24px', borderTop: '2px dashed #cbd5e1' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  backgroundColor: '#fef3c7',
+                  color: '#b45309',
+                  border: '1px solid #fde68a',
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                UI Demonstration Preview
+              </span>
+              <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#334155', margin: 0 }}>
+                Demonstration Clinical Progress Note Examples
+              </h4>
+            </div>
+            <p style={{ fontSize: '12.5px', color: '#64748b', margin: '4px 0 0 0' }}>
+              Clearly labeled frontend-only demonstration preview. Separated from clinical workflows and never submitted to database.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
+            {DEMO_DOCTOR_NOTES.map((demoNote) => (
+              <div
+                key={demoNote.id}
+                style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '16px',
+                  border: '1.5px dashed #f59e0b',
+                  padding: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  boxShadow: '0 2px 8px rgba(245, 158, 11, 0.05)',
+                }}
+              >
+                <div style={{ marginBottom: '12px' }}>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      backgroundColor: '#fffbeb',
+                      color: '#b45309',
+                      border: '1px solid #fde68a',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    ⚠️ DEMO — NOT A REAL PATIENT RECORD
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0284c7', fontWeight: 700, fontSize: '13px' }}>
+                    <StickyNote size={16} />
+                    <span>Clinical Observation</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748b' }}>
+                    <Calendar size={13} />
+                    <span>{new Date(demoNote.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+
+                <div style={{ flex: 1, whiteSpace: 'pre-wrap', color: '#334155', fontSize: '13.5px', lineHeight: '1.6', background: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                  {demoNote.note}
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
+                  <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                    Ref Record: <code style={{ color: '#0284c7' }}>{demoNote.medical_record_id}</code>
+                  </span>
+                  <span style={{ fontSize: '11px', color: '#d97706', fontWeight: 600, fontStyle: 'italic' }}>
+                    Demonstration Only
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

@@ -69,3 +69,44 @@ def mark_notification_as_read(
     db.refresh(notification)
 
     return notification
+
+
+@router.delete(
+    "/{notification_id}",
+    status_code=status.HTTP_200_OK,
+    summary="Delete a notification owned by current user",
+)
+def delete_notification(
+    notification_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Deletes a notification owned by the currently authenticated user.
+    Returns 404 if not found, 403 if belonging to another user.
+    """
+    notification = (
+        db.query(Notification)
+        .filter(Notification.id == notification_id)
+        .first()
+    )
+    if not notification:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Notification not found",
+        )
+
+    if notification.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden: You cannot delete another user's notification",
+        )
+
+    db.delete(notification)
+    db.commit()
+
+    return {
+        "message": "Notification successfully deleted",
+        "id": str(notification_id),
+    }
+

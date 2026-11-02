@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from typing import List
 from uuid import UUID
@@ -17,6 +18,7 @@ from app.schemas.medical_record import (
 )
 from app.utils.mongo import parse_object_id, format_doc
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/medical-records", tags=["Medical Records"])
 
 
@@ -88,12 +90,19 @@ def get_my_medical_records(
             detail="Patient profile not found",
         )
 
-    records = list(
-        medical_records_collection.find(
-            {"patient_id": str(patient.id)}
-        ).sort("created_at", -1)
-    )
-    return [format_doc(r) for r in records]
+    try:
+        records = list(
+            medical_records_collection.find(
+                {"patient_id": str(patient.id)}
+            ).sort("created_at", -1)
+        )
+        return [format_doc(r) for r in records]
+    except Exception as e:
+        logger.error(f"Error querying patient medical records from MongoDB: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"MongoDB query failed: {str(e)}",
+        )
 
 
 @router.get(
@@ -122,12 +131,19 @@ def get_patient_medical_records(
             detail="Patient not found",
         )
 
-    records = list(
-        medical_records_collection.find(
-            {"patient_id": str(patient_id), "doctor_id": str(doctor.id)}
-        ).sort("created_at", -1)
-    )
-    return [format_doc(r) for r in records]
+    try:
+        records = list(
+            medical_records_collection.find(
+                {"patient_id": str(patient_id), "doctor_id": str(doctor.id)}
+            ).sort("created_at", -1)
+        )
+        return [format_doc(r) for r in records]
+    except Exception as e:
+        logger.error(f"Error querying medical records from MongoDB: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"MongoDB query failed: {str(e)}",
+        )
 
 
 @router.get(

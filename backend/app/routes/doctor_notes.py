@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from typing import List
 from uuid import UUID
@@ -19,6 +20,7 @@ from app.schemas.doctor_note import (
 )
 from app.utils.mongo import parse_object_id, format_doc
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/doctor-notes", tags=["Doctor Notes"])
 
 
@@ -106,12 +108,19 @@ def get_my_doctor_notes(
             detail="Patient profile not found",
         )
 
-    notes = list(
-        doctor_notes_collection.find({"patient_id": str(patient.id)}).sort(
-            "created_at", -1
+    try:
+        notes = list(
+            doctor_notes_collection.find({"patient_id": str(patient.id)}).sort(
+                "created_at", -1
+            )
         )
-    )
-    return [format_doc(n) for n in notes]
+        return [format_doc(n) for n in notes]
+    except Exception as e:
+        logger.error(f"Error querying patient doctor notes from MongoDB: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"MongoDB query failed: {str(e)}",
+        )
 
 
 @router.get(
@@ -139,12 +148,19 @@ def get_patient_doctor_notes(
             detail="Patient not found",
         )
 
-    notes = list(
-        doctor_notes_collection.find(
-            {"patient_id": str(patient_id), "doctor_id": str(doctor.id)}
-        ).sort("created_at", -1)
-    )
-    return [format_doc(n) for n in notes]
+    try:
+        notes = list(
+            doctor_notes_collection.find(
+                {"patient_id": str(patient_id), "doctor_id": str(doctor.id)}
+            ).sort("created_at", -1)
+        )
+        return [format_doc(n) for n in notes]
+    except Exception as e:
+        logger.error(f"Error querying doctor notes from MongoDB: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"MongoDB query failed: {str(e)}",
+        )
 
 
 @router.get(

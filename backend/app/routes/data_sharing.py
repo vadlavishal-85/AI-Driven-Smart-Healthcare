@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from typing import List, Optional
 from uuid import UUID
@@ -9,6 +10,7 @@ from app.database.mongodb import (
     prescriptions_collection,
     doctor_notes_collection,
     lab_reports_collection,
+    check_mongodb_connection,
 )
 from app.models.user import User
 from app.models.doctor import Doctor
@@ -25,6 +27,7 @@ from app.schemas.data_sharing import (
 from app.utils.mongo import parse_object_id, format_doc
 from app.utils.access_logger import log_access
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/data-sharing", tags=["Data Sharing"])
 
 COLLECTIONS = {
@@ -38,12 +41,20 @@ COLLECTIONS = {
 def resolve_record_type_and_doc(record_id_str: str):
     """
     Finds the MongoDB document and identifies its collection/record_type.
+    Safely handles MongoDB connection timeouts or missing documents without crashing.
     """
-    obj_id = parse_object_id(record_id_str)
-    for r_type, coll in COLLECTIONS.items():
-        doc = coll.find_one({"_id": obj_id})
-        if doc is not None:
-            return r_type, doc
+    try:
+        if not check_mongodb_connection():
+            return None, None
+        obj_id = parse_object_id(record_id_str)
+        for r_type, coll in COLLECTIONS.items():
+            doc = coll.find_one({"_id": obj_id})
+            if doc is not None:
+                return r_type, doc
+    except Exception as e:
+        logger.warning(
+            f"Could not resolve MongoDB document for {record_id_str}: {e}"
+        )
     return None, None
 
 

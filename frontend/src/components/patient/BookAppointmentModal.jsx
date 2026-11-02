@@ -47,6 +47,7 @@ const BookAppointmentModal = ({ isOpen, onClose, onAppointmentCreated, preselect
   const [loadingDoctors, setLoadingDoctors] = useState(true);
   const [doctorFetchError, setDoctorFetchError] = useState('');
 
+  const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedDoctorId, setSelectedDoctorId] = useState(preselectedDoctorId || '');
   const [selectedDate, setSelectedDate] = useState(getTomorrowDateString());
   const [selectedTime, setSelectedTime] = useState('10:00 AM');
@@ -63,8 +64,26 @@ const BookAppointmentModal = ({ isOpen, onClose, onAppointmentCreated, preselect
       const data = await doctorService.getAllDoctors();
       const list = Array.isArray(data) ? data.filter((d) => d.is_active !== false) : [];
       setDoctors(list);
-      if (list.length > 0 && !selectedDoctorId) {
-        setSelectedDoctorId(list[0].id);
+
+      if (preselectedDoctorId) {
+        const found = list.find((d) => d.id === preselectedDoctorId);
+        if (found) {
+          const dept = getDoctorDepartment(found);
+          setSelectedDepartment(dept);
+          setSelectedDoctorId(found.id);
+          return;
+        }
+      }
+
+      if (list.length > 0) {
+        const firstDept = getDoctorDepartment(list[0]);
+        if (!selectedDepartment) {
+          setSelectedDepartment(firstDept);
+          const firstDeptDocs = list.filter((d) => getDoctorDepartment(d) === firstDept);
+          if (firstDeptDocs.length > 0 && !selectedDoctorId) {
+            setSelectedDoctorId(firstDeptDocs[0].id);
+          }
+        }
       }
     } catch (err) {
       setDoctorFetchError('Unable to load doctors. Please try again.');
@@ -84,16 +103,62 @@ const BookAppointmentModal = ({ isOpen, onClose, onAppointmentCreated, preselect
     }
   }, [isOpen, preselectedDoctorId]);
 
+  // Derive unique supported departments with doctor counts
+  const availableDepartments = React.useMemo(() => {
+    const map = new Map();
+    doctors.forEach((doc) => {
+      const dept = getDoctorDepartment(doc);
+      if (!map.has(dept)) {
+        map.set(dept, []);
+      }
+      map.get(dept).push(doc);
+    });
+    return Array.from(map.entries()).map(([name, docs]) => ({
+      name,
+      doctorCount: docs.length,
+    }));
+  }, [doctors]);
+
+  // Doctors filtered by currently selected department
+  const filteredDoctors = React.useMemo(() => {
+    if (!selectedDepartment) return [];
+    return doctors.filter((d) => getDoctorDepartment(d) === selectedDepartment);
+  }, [doctors, selectedDepartment]);
+
+  // Handle department change: updates doctors and resets doctor selection
+  const handleDepartmentChange = (dept) => {
+    setSelectedDepartment(dept);
+    // Reset doctor selection so a doctor from another department cannot be accidentally submitted
+    const deptDocs = doctors.filter((d) => getDoctorDepartment(d) === dept);
+    if (deptDocs.length > 0) {
+      setSelectedDoctorId(deptDocs[0].id);
+    } else {
+      setSelectedDoctorId('');
+    }
+  };
+
   if (!isOpen) return null;
 
   const selectedDoctor = doctors.find((d) => d.id === selectedDoctorId);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedDoctorId) {
-      setSubmitError('Please select a doctor for your appointment.');
+    if (!selectedDepartment) {
+      setSubmitError('Please select a medical department.');
       return;
     }
+    if (!selectedDoctorId) {
+      setSubmitError('Please select a doctor from the selected department.');
+      return;
+    }
+
+    // Verify selected doctor belongs to selected department
+    const docObj = doctors.find((d) => d.id === selectedDoctorId);
+    if (!docObj || getDoctorDepartment(docObj) !== selectedDepartment) {
+      setSubmitError(`The selected doctor does not belong to the '${selectedDepartment}' department.`);
+      return;
+    }
+
     if (!selectedDate) {
       setSubmitError('Please select an appointment date.');
       return;
@@ -118,6 +183,7 @@ const BookAppointmentModal = ({ isOpen, onClose, onAppointmentCreated, preselect
       setSubmitError('');
       const res = await appointmentService.createAppointment({
         doctor_id: selectedDoctorId,
+        department: selectedDepartment,
         appointment_date: isoDate,
         reason: reason.trim(),
       });
@@ -180,23 +246,22 @@ const BookAppointmentModal = ({ isOpen, onClose, onAppointmentCreated, preselect
             </div>
           )}
 
-          {/* SECTION 1: DOCTOR SELECTION */}
+          {/* STEP 1: SELECT MEDICAL DEPARTMENT */}
           <div className="appt-section">
             <div className="appt-section-header">
               <div className="appt-step-num">1</div>
               <div>
-                <h3 className="appt-section-title">Choose Doctor</h3>
+                <h3 className="appt-section-title">Select Medical Department</h3>
                 <p className="appt-section-desc">
-                  Select from our licensed healthcare physicians and specialists
+                  Choose a clinical department to view available medical specialists
                 </p>
               </div>
             </div>
 
-            {/* Empty States Handling */}
             {loadingDoctors ? (
               <div className="appt-state-box">
                 <div className="appt-spinner" />
-                <p className="appt-state-text">Loading available doctors...</p>
+                <p className="appt-state-text">Loading medical departments...</p>
               </div>
             ) : doctorFetchError ? (
               <div className="appt-state-box appt-state-box-error">
@@ -207,19 +272,71 @@ const BookAppointmentModal = ({ isOpen, onClose, onAppointmentCreated, preselect
                   onClick={fetchDoctors}
                   className="appt-retry-btn"
                 >
-                  Retry Loading Doctors
+                  Retry Loading
                 </button>
               </div>
-            ) : doctors.length === 0 ? (
+            ) : availableDepartments.length === 0 ? (
+              <div className="appt-state-box">
+                <Building2 size={36} color="#94a3b8" />
+                <p className="appt-state-text">
+                  No medical departments are currently available for booking.
+                </p>
+              </div>
+            ) : (
+              <div className="appt-dept-grid">
+                {availableDepartments.map(({ name, doctorCount }) => {
+                  const isSelected = selectedDepartment === name;
+                  return (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => handleDepartmentChange(name)}
+                      className={`appt-dept-pill ${isSelected ? 'appt-dept-pill-active' : ''}`}
+                    >
+                      <span className="appt-dept-pill-name">{name}</span>
+                      <span className="appt-dept-pill-count">
+                        {doctorCount} {doctorCount === 1 ? 'Doctor' : 'Doctors'}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* STEP 2: DOCTOR SELECTION */}
+          <div className="appt-section">
+            <div className="appt-section-header">
+              <div className="appt-step-num">2</div>
+              <div>
+                <h3 className="appt-section-title">
+                  Choose Doctor {selectedDepartment ? `— ${selectedDepartment}` : ''}
+                </h3>
+                <p className="appt-section-desc">
+                  {selectedDepartment
+                    ? `Select an authorized specialist in the ${selectedDepartment} department`
+                    : 'Select a department above to view available doctors'}
+                </p>
+              </div>
+            </div>
+
+            {!selectedDepartment ? (
               <div className="appt-state-box">
                 <Stethoscope size={36} color="#94a3b8" />
                 <p className="appt-state-text">
-                  No doctors are currently available for appointment booking.
+                  Please select a medical department in Step 1 to view physicians.
+                </p>
+              </div>
+            ) : filteredDoctors.length === 0 ? (
+              <div className="appt-state-box">
+                <Stethoscope size={36} color="#94a3b8" />
+                <p className="appt-state-text">
+                  No active doctors are currently available in the {selectedDepartment} department.
                 </p>
               </div>
             ) : (
               <div className="appt-doctor-grid">
-                {doctors.map((doc) => {
+                {filteredDoctors.map((doc) => {
                   const isSelected = doc.id === selectedDoctorId;
                   const docImg = getDoctorImage(doc);
                   const dept = getDoctorDepartment(doc);
@@ -272,10 +389,10 @@ const BookAppointmentModal = ({ isOpen, onClose, onAppointmentCreated, preselect
             )}
           </div>
 
-          {/* SECTION 2: DATE & TIME SELECTION */}
+          {/* STEP 3: DATE & TIME SELECTION */}
           <div className="appt-section">
             <div className="appt-section-header">
-              <div className="appt-step-num">2</div>
+              <div className="appt-step-num">3</div>
               <div>
                 <h3 className="appt-section-title">Select Date & Time</h3>
                 <p className="appt-section-desc">Choose your preferred clinical appointment slot</p>
@@ -324,10 +441,10 @@ const BookAppointmentModal = ({ isOpen, onClose, onAppointmentCreated, preselect
             </div>
           </div>
 
-          {/* SECTION 3: REASON FOR VISIT */}
+          {/* STEP 4: REASON FOR VISIT */}
           <div className="appt-section">
             <div className="appt-section-header">
-              <div className="appt-step-num">3</div>
+              <div className="appt-step-num">4</div>
               <div>
                 <h3 className="appt-section-title">Reason for Visit</h3>
                 <p className="appt-section-desc">
@@ -390,7 +507,7 @@ const BookAppointmentModal = ({ isOpen, onClose, onAppointmentCreated, preselect
             <button
               type="submit"
               className="appt-confirm-btn"
-              disabled={submitting || !selectedDoctorId || !selectedDate || !selectedTime || !reason.trim()}
+              disabled={submitting || !selectedDepartment || !selectedDoctorId || !selectedDate || !selectedTime || !reason.trim()}
             >
               {submitting ? 'Confirming Appointment...' : 'Confirm Appointment'}
             </button>
@@ -605,6 +722,60 @@ const BookAppointmentModal = ({ isOpen, onClose, onAppointmentCreated, preselect
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
+          }
+
+          /* Department Pills Grid */
+          .appt-dept-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+          }
+
+          .appt-dept-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: 12px;
+            border: 1.5px solid #cbd5e1;
+            background-color: #ffffff;
+            color: #334155;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+          }
+
+          .appt-dept-pill:hover {
+            border-color: #0284c7;
+            color: #0284c7;
+            background-color: #f0f9ff;
+          }
+
+          .appt-dept-pill-active {
+            border-color: #0284c7 !important;
+            background-color: #0284c7 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
+          }
+
+          .appt-dept-pill-name {
+            font-size: 13.5px;
+            font-weight: 700;
+          }
+
+          .appt-dept-pill-count {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 9999px;
+            background-color: rgba(0, 0, 0, 0.06);
+            color: inherit;
+          }
+
+          .appt-dept-pill-active .appt-dept-pill-count {
+            background-color: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
           }
 
           /* Doctor Cards Grid */
